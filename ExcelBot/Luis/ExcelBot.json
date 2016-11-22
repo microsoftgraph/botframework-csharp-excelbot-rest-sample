@@ -2191,11 +2191,6 @@
       ]
     },
     {
-      "text": "i have team ipads opened",
-      "intent": "None",
-      "entities": [ ]
-    },
-    {
       "text": "open timesheet",
       "intent": "openWorkbook",
       "entities": [
