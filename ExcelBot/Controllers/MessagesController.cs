@@ -15,6 +15,7 @@ using Microsoft.Bot.Connector;
 
 using ExcelBot.Dialogs;
 using ExcelBot.Helpers;
+using System.Web;
 
 namespace ExcelBot
 {
@@ -26,10 +27,11 @@ namespace ExcelBot
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
         /// </summary>
-        public async Task<Message> Post([FromBody]Message message)
+        public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
+            ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
             // Add User, Conversation and Channel Id to instrumentation
-            TelemetryHelper.SetIds(message);
+            TelemetryHelper.SetIds(activity);
 
             // Save the request url
             RequestHelper.RequestUri = Request.RequestUri;
@@ -37,51 +39,63 @@ namespace ExcelBot
             // Check authentication
             try
             {
-                ServicesHelper.AccessToken = await AuthHelper.GetAccessToken(message);
+                ServicesHelper.AccessToken = await AuthHelper.GetAccessToken(activity);
             }
             catch (Exception)
             {
-                return message.CreateReplyMessage($"You must sign in to use the bot: {Request.RequestUri.Scheme}://{Request.RequestUri.Authority}/api/{message.From.ChannelId}/{message.From.Id}/login");
+                Activity reply = activity.CreateReply($"You must sign in to use the bot: {Request.RequestUri.Scheme}://{Request.RequestUri.Authority}/api/{activity.ChannelId}/{HttpUtility.UrlEncode(activity.From.Id)}/login");
+                await connector.Conversations.ReplyToActivityAsync(reply);
+
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
 
             // Process the message
-            if ((message.Type == "Message") && (message.Text.StartsWith("!")))
+            if ((activity.Type == ActivityTypes.Message) && (activity.Text.StartsWith("!")))
             {
-                return HandleCommandMessage(message);
+                var reply = HandleCommandMessage(activity);
+                await connector.Conversations.ReplyToActivityAsync(reply);
             }
-            else if (message.Type == "Message")
+            else if (activity.Type == ActivityTypes.Message)
             {
-                ServicesHelper.StartLogging(message);
-                return await Conversation.SendAsync(message, () => new ExcelBotDialog());
+                ServicesHelper.StartLogging(activity);
+                await Conversation.SendAsync(activity, () => new ExcelBotDialog());
             }
             else
             {
-                return HandleSystemMessage(message);
+                HandleSystemMessage(activity);
             }
+            return Request.CreateResponse(HttpStatusCode.OK);
         }
 
-        private Message HandleCommandMessage(Message message)
+        private Activity HandleCommandMessage(Activity activity)
         {
-            Message reply = message.CreateReplyMessage();
+            StateClient stateClient = activity.GetStateClient();
 
-            var messageParts = message.Text.ToLower().Split(' ');
+            Activity reply = activity.CreateReply();
+
+            var messageParts = activity.Text.ToLower().Split(' ');
 
             switch (messageParts[0])
             {
                 case "!verbose":
                     if ((messageParts.Length >= 2) && (messageParts[1] == "on"))
                     {
-                        reply.SetBotConversationData("Verbose", true);
+                        var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
+                        conversationData.SetProperty<bool>("Verbose", true);
+                        stateClient.BotState.SetConversationData(activity.ChannelId, activity.Conversation.Id, conversationData);
                         reply.Text = @"Verbose mode is **On**";
                     }
                     else if ((messageParts.Length >= 2) && (messageParts[1] == "off"))
                     {
-                        reply.SetBotConversationData("Verbose", false);
+                        var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
+                        conversationData.SetProperty<bool>("Verbose", false);
+                        stateClient.BotState.SetConversationData(activity.ChannelId, activity.Conversation.Id, conversationData);
                         reply.Text = @"Verbose mode is **Off**";
                     } 
                     else
                     {
-                        var verbose = message.GetBotConversationData<bool>("Verbose");
+                        var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
+                        var verbose = conversationData.GetProperty<bool>("Verbose");
                         var verboseState = verbose ? "On":"Off";
                         reply.Text = $@"Verbose mode is **{verboseState}**";
                     }
@@ -93,34 +107,29 @@ namespace ExcelBot
             return reply;
         }
 
-        private Message HandleSystemMessage(Message message)
+        private Activity HandleSystemMessage(Activity message)
         {
-            if (message.Type == "Ping")
+            if (message.Type == ActivityTypes.DeleteUserData)
             {
-                Message reply = message.CreateReplyMessage();
-                reply.Type = "Ping";
-                return reply;
+                // Implement user deletion here
+                // If we handle user deletion, return a real message
             }
-            else if (message.Type == "DeleteUserData")
+            else if (message.Type == ActivityTypes.ConversationUpdate)
             {
+                // Handle conversation state changes, like members being added and removed
+                // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
+                // Not available in all channels
             }
-            else if (message.Type == "BotAddedToConversation")
+            else if (message.Type == ActivityTypes.ContactRelationUpdate)
             {
-                
+                // Handle add/remove from contact lists
+                // Activity.From + Activity.Action represent what happened
             }
-            else if (message.Type == "BotRemovedFromConversation")
+            else if (message.Type == ActivityTypes.Typing)
             {
-                
+                // Handle knowing tha the user is typing
             }
-            else if (message.Type == "UserAddedToConversation")
-            {
-                return message.CreateReplyMessage($"Hi there!");
-            }
-            else if (message.Type == "UserRemovedFromConversation")
-            {
-                return message.CreateReplyMessage($"Goodbye!");
-            }
-            else if (message.Type == "EndOfConversation")
+            else if (message.Type == ActivityTypes.Ping)
             {
             }
 

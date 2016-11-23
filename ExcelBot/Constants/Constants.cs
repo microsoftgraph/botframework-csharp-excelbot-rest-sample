@@ -14,22 +14,13 @@ namespace ExcelBot
     public static class Constants
     {
         #region
-
-        internal static string LogicAppQueryUrl = ConfigurationManager.AppSettings["logicAppQueryUrl"];
-        internal static string LogicAppCreateUrl = ConfigurationManager.AppSettings["logicAppCreateUrl"];
-        internal static string LogicAppCommandUrl = ConfigurationManager.AppSettings["logicAppCommandUrl"];
+        internal static string microsoftAppId = ConfigurationManager.AppSettings["MicrosoftAppId"];
+        internal static string microsoftAppPassword = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
 
         internal static string ADClientId = ConfigurationManager.AppSettings["ADClientId"];
         internal static string ADClientSecret = ConfigurationManager.AppSettings["ADClientSecret"];
 
         internal static string apiBasePath = ConfigurationManager.AppSettings["apiBasePath"].ToLower();
-
-        internal static string botId = ConfigurationManager.AppSettings["AppId"];
-        internal static string botSecret = ConfigurationManager.AppSettings["AppSecret"];
-
-        internal static string regex_create = "\\s(.*):\\s?(.*)";
-        internal static string regex_command = "^\\/(\\w*)\\s*";
-
         #endregion
     }
 

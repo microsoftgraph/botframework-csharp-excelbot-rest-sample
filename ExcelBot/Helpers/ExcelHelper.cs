@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
 
 namespace ExcelBot.Helpers
 {
@@ -46,7 +47,7 @@ namespace ExcelBot.Helpers
             }
         }
 
-        public static string GetSessionIdForRead(Dictionary<string, object> conversationData, string workbookId)
+        public static string GetSessionIdForRead(BotData conversationData, string workbookId)
         {
             string sessionId = String.Empty;
             if (TryGetSession(conversationData, workbookId, out sessionId))
@@ -114,14 +115,14 @@ namespace ExcelBot.Helpers
             return false;
         }
 
-        private static bool TryGetSession(Dictionary<string, object> conversationData, string workbookId, out string sessionId)
+        private static bool TryGetSession(BotData conversationData, string workbookId, out string sessionId)
         {
-            object sessionIdObj = string.Empty;
-            if (conversationData.TryGetValue("SessionId", out sessionIdObj))
+            var sessionIdObj = conversationData.GetProperty<string>("SessionId");
+            if (sessionIdObj != string.Empty)
             {
                 // Check that the session is for the right workbook
-                object sessionWorkbookIdObj = "";
-                if ((conversationData.TryGetValue("SessionWorkbookId", out sessionWorkbookIdObj)) && (workbookId != (string)sessionWorkbookIdObj))
+                var sessionWorkbookIdObj = conversationData.GetProperty<string>("SessionWorkbookId"); ;
+                if ((sessionWorkbookIdObj != string.Empty) && (workbookId != (string)sessionWorkbookIdObj))
                 {
                     // Session is with another workbook
                     sessionId = "";
@@ -129,8 +130,8 @@ namespace ExcelBot.Helpers
                 }
 
                 // Check that the session hasn't expired
-                object sessionExpiresOnObj = DateTime.MinValue;
-                if ((conversationData.TryGetValue("SessionExpiresOn", out sessionExpiresOnObj)) && (DateTime.Compare(DateTime.Now, (DateTime)sessionExpiresOnObj) < 0))
+                var sessionExpiresOnObj = conversationData.GetProperty<DateTime>("SessionExpiresOn");
+                if (DateTime.Compare(DateTime.Now, (DateTime)sessionExpiresOnObj) < 0)
                 {
                     sessionId = (string)sessionIdObj;
                     return true;

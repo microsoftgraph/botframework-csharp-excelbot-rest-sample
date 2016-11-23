@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using Microsoft.ApplicationInsights;
 
-using Microsoft.Bot.Connector;
-
 using ExcelBot.Dialogs;
 using ExcelBot.Model;
 using System.Net.Http;

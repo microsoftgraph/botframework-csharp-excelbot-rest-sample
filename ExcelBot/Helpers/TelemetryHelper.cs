@@ -12,20 +12,20 @@ using System.Web;
 
 using Microsoft.ApplicationInsights;
 
-using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis.Models;
+using Microsoft.Bot.Connector;
 
 namespace ExcelBot.Helpers
 {
     public static class TelemetryHelper
     {
         #region Methods
-        public static void SetIds(Message message)
+        public static void SetIds(Activity activity)
         {
-            HttpContext.Current.Items["UserId"] = message.From.Id;
-            HttpContext.Current.Items["ConversationId"] = message.ConversationId;
-            HttpContext.Current.Items["ChannelId"] = message.From.ChannelId;
+            HttpContext.Current.Items["UserId"] = activity.From.Id;
+            HttpContext.Current.Items["ConversationId"] = activity.Conversation.Id;
+            HttpContext.Current.Items["ChannelId"] = activity.ChannelId;
         }
         public static void TrackEvent(string eventName, Dictionary<string, string> properties = null, Dictionary<string, double> metrics = null)
         {

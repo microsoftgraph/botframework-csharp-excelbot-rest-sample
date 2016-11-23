@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 using System.Web;
 
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
 
 using Microsoft.ExcelServices;
 
 using ExcelBot.Helpers;
+using Microsoft.Bot.Connector;
 
 namespace ExcelBot.Workers
 {
@@ -107,9 +107,8 @@ namespace ExcelBot.Workers
             try
             {
                 var reply = context.MakeMessage();
-                reply.To.Id = (reply.To.Id != null) ? reply.To.Id : (string)(HttpContext.Current.Items["UserId"]);
-                reply.Attachments = new List<Attachment>();
-                reply.Attachments.Add(new Attachment() { ContentType = "image/png", ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.To.ChannelId}/{reply.ConversationId}/{reply.To.Id}/{workbookId}/{worksheetId.Replace(" ", "%20")}/{chart.Name.Replace(" ","%20")}/image" });
+                reply.Recipient.Id = (reply.Recipient.Id != null) ? reply.Recipient.Id : (string)(HttpContext.Current.Items["UserId"]);
+                reply.Attachments.Add(new Attachment() { ContentType = "image/png", ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.ChannelId}/{reply.Conversation.Id}/{reply.Recipient.Id}/{workbookId}/{worksheetId.Replace(" ", "%20")}/{chart.Name.Replace(" ","%20")}/image" });
                 await context.PostAsync(reply);
             }
             catch (Exception ex)

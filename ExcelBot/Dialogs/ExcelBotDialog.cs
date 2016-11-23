@@ -23,8 +23,7 @@ namespace ExcelBot.Dialogs
     public partial class ExcelBotDialog : LuisDialog<object>
     {
         #region Constructor
-        public ExcelBotDialog(ILuisService service = null)
-                : base(service)
+        public ExcelBotDialog()
         {
         }
         #endregion
@@ -52,7 +51,7 @@ namespace ExcelBot.Dialogs
 
                 // Did the bot already greet the user?
                 bool saidHello = false;
-                context.PerUserInConversationData.TryGetValue<bool>("SaidHello", out saidHello);
+                context.PrivateConversationData.TryGetValue<bool>("SaidHello", out saidHello);
 
                 // Get the user data
                 var user = await ServicesHelper.UserService.GetUserAsync();
@@ -69,7 +68,7 @@ namespace ExcelBot.Dialogs
                 }
 
                 // Record that the bot said hello
-                context.PerUserInConversationData.SetValue<bool>("SaidHello", true);
+                context.PrivateConversationData.SetValue<bool>("SaidHello", true);
             }
             catch (Exception ex)
             {

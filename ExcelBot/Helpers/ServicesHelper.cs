@@ -111,9 +111,11 @@ namespace ExcelBot.Helpers
         #endregion
 
         #region Methods
-        public static void StartLogging(Message message)
+        public static void StartLogging(Activity activity)
         {
-            var verbose = message.GetBotConversationData<bool>("Verbose");
+            var stateClient = activity.GetStateClient();
+            var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
+            var verbose = conversationData.GetProperty<bool>("Verbose");
             if (verbose)
             {
                 UserService.RequestViewModel = new RequestViewModel();

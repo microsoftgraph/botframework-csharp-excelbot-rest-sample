@@ -10,9 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
 using Microsoft.Bot.Connector;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 using Newtonsoft.Json.Linq;
 
@@ -21,25 +20,22 @@ namespace ExcelBot.Helpers
     public static class AuthHelper
     {
         #region Methods
-        public static async Task SaveAuthResult(HttpRequestMessage request, string channelId, string userId, string authResult)
+        public async static Task<string> GetAccessToken(Activity activity)
         {
-            var userData = await BotDataHelper.GetUserData(channelId, userId);
-            userData["AuthResult"] = authResult;
-            await BotDataHelper.SaveUserData(channelId, userId, userData);
-        }
+            var stateClient = activity.GetStateClient();
+            var userData = stateClient.BotState.GetUserData(activity.ChannelId, activity.From.Id);
 
-        public async static Task<string> GetAccessToken(Message message)
-        {
-            if (message.BotUserData != null)
+            if (userData != null)
             {
-                var userData = ((JObject)(message.BotUserData)).ToObject<Dictionary<string, string>>();
-                AuthenticationResult ar = AuthenticationResult.Deserialize(userData["AuthResult"]);
+                var authResult = userData.GetProperty<string>("AuthResult");
+                AuthenticationResult ar = AuthenticationResult.Deserialize(authResult);
                 AuthenticationContext ac = new AuthenticationContext("https://login.windows.net/common/oauth2/authorize/");
                 if (DateTimeOffset.Compare(DateTimeOffset.Now, ar.ExpiresOn) >= 0)
                 {
                     // Refresh access token
                     ar = await ac.AcquireTokenByRefreshTokenAsync(ar.RefreshToken, new ClientCredential(Constants.ADClientId, Constants.ADClientSecret));
-                    message.SetBotUserData("AuthResult", ar.Serialize());
+                    userData.SetProperty<string>("AuthResult", ar.Serialize());
+                    stateClient.BotState.SetUserData(activity.ChannelId, activity.From.Id, userData);
                 }
                 return ar.AccessToken;
             }
@@ -51,21 +47,27 @@ namespace ExcelBot.Helpers
 
         public async static Task<string> GetAccessToken(string channelId, string userId)
         {
-            var userData = await BotDataHelper.GetUserData(channelId, userId);
-            if (!userData.ContainsKey("AuthResult"))
+            var stateClient = (channelId == "emulator") ?
+                new StateClient(new Uri("http://localhost:9002"), new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword)) :
+                new StateClient(new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword));
+
+            var userData = stateClient.BotState.GetUserData(channelId, userId);
+
+            var authResult = userData.GetProperty<string>("AuthResult");
+            if (authResult == "")
             {
                 throw new Exception("AuthResult not found");
             }
 
-            AuthenticationResult ar = AuthenticationResult.Deserialize((string)(userData["AuthResult"]));
+            AuthenticationResult ar = AuthenticationResult.Deserialize((string)(authResult));
             AuthenticationContext ac = new AuthenticationContext("https://login.windows.net/common/oauth2/authorize/");
 
             if (DateTimeOffset.Compare(DateTimeOffset.Now, ar.ExpiresOn) >= 0)
             {
                 // Refresh access token
                 ar = await ac.AcquireTokenByRefreshTokenAsync(ar.RefreshToken, new ClientCredential(Constants.ADClientId, Constants.ADClientSecret));
-                userData["AuthResult"] = ar.Serialize();
-                await BotDataHelper.SaveUserData(channelId, userId, userData);
+                userData.SetProperty<string>("AuthResult", ar.Serialize());
+                stateClient.BotState.SetUserData(channelId, userId, userData);
             }
             return ar.AccessToken;
         }

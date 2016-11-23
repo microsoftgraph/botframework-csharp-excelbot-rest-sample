@@ -16,6 +16,7 @@ using System.IO;
 using System.Net.Http.Headers;
 
 using ExcelBot.Helpers;
+using Microsoft.Bot.Connector;
 
 namespace ExcelBot
 {
@@ -39,7 +40,11 @@ namespace ExcelBot
             }
 
             // Get session id
-            var conversationData = await BotDataHelper.GetConversationData(channelId, conversationId);
+
+            var stateClient = (channelId == "emulator") ? 
+                                new StateClient(new Uri("http://localhost:9002"), new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword)) :
+                                new StateClient(new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword));
+            var conversationData = stateClient.BotState.GetConversationData(channelId, conversationId);
             
             // Get the chart image
             var imageAsString = await ServicesHelper.ExcelService.GetChartImageAsync(workbookId, worksheetId, chartId, ExcelHelper.GetSessionIdForRead(conversationData, workbookId));
