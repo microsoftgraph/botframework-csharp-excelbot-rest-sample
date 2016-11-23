@@ -19,7 +19,7 @@ Complete the these steps to setup your development environment to build and test
   * Clone and build the [Excel REST API Explorer](https://github.com/microsoftgraph/uwp-csharp-excel-snippets-rest-sample) sample to the same folder. Excel Bot uses a library in the Excel REST API Explorer project to make the REST API calls to the Microsoft Graph.
   * Open the ExcelBot.sln solution file
   * Register the bot in the [Bot Framework](https://dev.botframework.com/bots/new)
-  * Copy the the bot MicrosoftAppId and MicrosoftAppPassword to the Web.config file
+  * Copy the bot MicrosoftAppId and MicrosoftAppPassword to the Web.config file
   * [Register the bot to call the Microsoft Graph](http://dev.office.com/app-registration)
   * Copy the Azure Active Directory Client Id and Secret to the Web.config file
   * Create a new model in the [LUIS](http://luis.ai) service
