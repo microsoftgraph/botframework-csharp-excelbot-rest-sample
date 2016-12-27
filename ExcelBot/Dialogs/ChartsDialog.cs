@@ -18,7 +18,7 @@ using ExcelBot.Workers;
 
 namespace ExcelBot.Dialogs
 {
-    public partial class ExcelBotDialog : LuisDialog<object>
+    public partial class ExcelBotDialog : GraphDialog
     {
         #region Properties
         #endregion

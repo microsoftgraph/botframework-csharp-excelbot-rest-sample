@@ -9,10 +9,13 @@ using System.Linq;
 using System.Web;
 using System.Threading.Tasks;
 using System.Text;
+using System.Configuration;
 
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Builder.FormFlow;
+
+using AuthBot;
 
 using ExcelBot.Helpers;
 using ExcelBot.Forms;
@@ -20,7 +23,7 @@ using ExcelBot.Workers;
 
 namespace ExcelBot.Dialogs
 {
-    public partial class ExcelBotDialog : LuisDialog<object>
+    public partial class ExcelBotDialog : GraphDialog
     {
         #region Intents
         [LuisIntent("openWorkbook")]
@@ -56,6 +59,10 @@ namespace ExcelBot.Dialogs
 
             if (form != null)
             {
+                // Get access token to see if user is authenticated
+                ServicesHelper.AccessToken = await context.GetAccessToken(ConfigurationManager.AppSettings["ActiveDirectory.ResourceId"]);
+
+                // Open workbook 
                 await WorkbookWorker.DoOpenWorkbookAsync(context, form.WorkbookName);
             }
             else

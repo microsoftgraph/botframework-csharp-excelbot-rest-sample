@@ -30,24 +30,12 @@ namespace ExcelBot
         public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
             ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+            
             // Add User, Conversation and Channel Id to instrumentation
             TelemetryHelper.SetIds(activity);
 
             // Save the request url
             RequestHelper.RequestUri = Request.RequestUri;
-
-            // Check authentication
-            try
-            {
-                ServicesHelper.AccessToken = await AuthHelper.GetAccessToken(activity);
-            }
-            catch (Exception)
-            {
-                Activity reply = activity.CreateReply($"You must sign in to use the bot: {Request.RequestUri.Scheme}://{Request.RequestUri.Authority}/api/{activity.ChannelId}/{HttpUtility.UrlEncode(activity.From.Id)}/login");
-                await connector.Conversations.ReplyToActivityAsync(reply);
-
-                return Request.CreateResponse(HttpStatusCode.OK);
-            }
 
             // Process the message
             if ((activity.Type == ActivityTypes.Message) && (activity.Text.StartsWith("!")))

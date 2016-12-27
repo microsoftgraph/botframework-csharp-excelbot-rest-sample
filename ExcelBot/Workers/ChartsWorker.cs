@@ -11,11 +11,12 @@ using System.Threading.Tasks;
 using System.Web;
 
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
 
 using Microsoft.ExcelServices;
 
 using ExcelBot.Helpers;
-using Microsoft.Bot.Connector;
+using ExcelBot.Model;
 
 namespace ExcelBot.Workers
 {
@@ -106,9 +107,22 @@ namespace ExcelBot.Workers
         {
             try
             {
+                // Create and save user nonce
+                var userNonce = (Guid.NewGuid()).ToString();
+                context.ConversationData.SetValue<ChartAttachment>(
+                    userNonce, 
+                    new ChartAttachment()
+                    {
+                        WorkbookId = workbookId,
+                        WorksheetId = worksheetId,
+                        ChartId = chart.ChartId
+                    });
+                await context.FlushAsync(context.CancellationToken);
+
+                // Replay with chart URL attached
                 var reply = context.MakeMessage();
                 reply.Recipient.Id = (reply.Recipient.Id != null) ? reply.Recipient.Id : (string)(HttpContext.Current.Items["UserId"]);
-                reply.Attachments.Add(new Attachment() { ContentType = "image/png", ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.ChannelId}/{reply.Conversation.Id}/{reply.Recipient.Id}/{workbookId}/{worksheetId.Replace(" ", "%20")}/{chart.Name.Replace(" ","%20")}/image" });
+                reply.Attachments.Add(new Attachment() { ContentType = "image/png", ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.ChannelId}/{reply.Conversation.Id}/{reply.Recipient.Id}/{userNonce}/image" });
                 await context.PostAsync(reply);
             }
             catch (Exception ex)

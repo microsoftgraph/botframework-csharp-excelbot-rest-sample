@@ -47,6 +47,7 @@ namespace ExcelBot.Workers
                     item.Id,
                     ExcelHelper.GetSessionIdForRead(context),
                     "$top=1");
+                await ServicesHelper.LogExcelServiceResponse(context);
 
                 context.UserData.SetValue("WorksheetId", worksheets[0].Name);
 

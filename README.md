@@ -21,6 +21,8 @@ Complete the these steps to setup your development environment to build and test
   * Register the bot in the [Bot Framework](https://dev.botframework.com/bots/new)
   * Copy the bot MicrosoftAppId and MicrosoftAppPassword to the Web.config file
   * [Register the bot to call the Microsoft Graph](http://dev.office.com/app-registration)
+    - Assign the following Delegated Permissions to the app: Sign in and read user profile (User.Read), Have full access to user files (Files.ReadWrite)
+    - Add the bots host name to the list of Reply URLs using the format https://BOT HOST NAME
   * Copy the Azure Active Directory Client Id and Secret to the Web.config file
   * Create a new model in the [LUIS](http://luis.ai) service
   * Import the LUIS\excelbot.json file into LUIS

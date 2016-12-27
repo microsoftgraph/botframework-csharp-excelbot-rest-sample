@@ -44,12 +44,12 @@ namespace ExcelBot.Helpers
 
         public static string GetChartEntity(IList<EntityRecommendation> entities)
         {
-            var namesAndNumbers = entities.Where<EntityRecommendation>((e) => ((e.Type == "Name") || (e.Type == "builtin.number")));
-            if (namesAndNumbers != null)
+            var names = entities.Where<EntityRecommendation>((e) => (e.Type == "Name"));
+            if (names != null)
             {
                 var name = new StringBuilder();
                 var separator = "";
-                foreach (var entitiy in namesAndNumbers)
+                foreach (var entitiy in names)
                 {
                     name.Append($"{separator}{entitiy.Entity}");
                     separator = " ";

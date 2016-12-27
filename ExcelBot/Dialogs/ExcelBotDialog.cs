@@ -9,18 +9,23 @@ using System.Linq;
 using System.Web;
 using System.Threading.Tasks;
 using System.Text;
+using System.Configuration;
 
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 
+using AuthBot;
+using AuthBot.Dialogs;
+using AuthBot.Models;
+
 using ExcelBot.Helpers;
 
 namespace ExcelBot.Dialogs
 {
-    [LuisModel("LUIS MODEL ID", "LUIS SUBSCRIPTION KEY")]
+    //[LuisModel("LUIS MODEL ID", "LUIS SUBSCRIPTION KEY", LuisApiVersion.V2)]
     [Serializable]
-    public partial class ExcelBotDialog : LuisDialog<object>
+    public partial class ExcelBotDialog : GraphDialog
     {
         #region Constructor
         public ExcelBotDialog()
