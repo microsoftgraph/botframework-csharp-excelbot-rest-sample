@@ -23,7 +23,7 @@ using ExcelBot.Helpers;
 
 namespace ExcelBot.Dialogs
 {
-    //[LuisModel("LUIS MODEL ID", "LUIS SUBSCRIPTION KEY", LuisApiVersion.V2)]
+    [LuisModel("LUIS MODEL ID", "LUIS SUBSCRIPTION KEY", LuisApiVersion.V2)]
     [Serializable]
     public partial class ExcelBotDialog : GraphDialog
     {
