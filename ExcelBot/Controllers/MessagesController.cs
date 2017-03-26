@@ -36,6 +36,19 @@ namespace ExcelBot
 
             // Save the request url
             RequestHelper.RequestUri = Request.RequestUri;
+            
+            // Remove bot mention from message text
+            Mention[] m = activity.GetMentions();
+            for (int i = 0; i < m.Length; i++)
+            {
+                if (m[i].Mentioned.Id == activity.Recipient.Id)
+                {
+                    // Bot is in the @mention list.  
+                    // Strip the bot name out of the message, so it can parse it as if it wasn't included. 
+                    if (m[i].Text != null)
+                        activity.Text = activity.Text.Replace(m[i].Text, "");
+                }
+            }
 
             // Process the message
             if ((activity.Type == ActivityTypes.Message) && (activity.Text.StartsWith("!")))
@@ -46,6 +59,13 @@ namespace ExcelBot
             else if (activity.Type == ActivityTypes.Message)
             {
                 ServicesHelper.StartLogging(activity);
+
+                // Send isTyping message
+                var reply = activity.CreateReply(String.Empty);
+                reply.Type = ActivityTypes.Typing;
+                await connector.Conversations.ReplyToActivityAsync(reply);
+
+                // Process message
                 await Conversation.SendAsync(activity, () => new ExcelBotDialog());
             }
             else
