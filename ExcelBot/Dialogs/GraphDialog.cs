@@ -24,7 +24,7 @@ namespace ExcelBot.Dialogs
     public class GraphDialog : LuisDialog<object>
     {
         // #wit: uncomment below line to use wit.ai
-        public GraphDialog() : base(new WitAiLuisService("wit-ai-token")) { }
+        //public GraphDialog() : base(new WitAiLuisService("wit-ai-token")) { }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task StartAsync(IDialogContext context)

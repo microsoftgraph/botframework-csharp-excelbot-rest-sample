@@ -11,7 +11,7 @@ using System.Web;
 namespace ExcelBot.Wit
 {
     /// <summary>
-    /// ILuisService implemenation for wit.ai
+    /// ILuisService implementation for wit.ai
     /// 
     /// reference: https://github.com/adebisi-fa/Bot.Builder.WitAi
     /// </summary>
