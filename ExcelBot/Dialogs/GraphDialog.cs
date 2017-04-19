@@ -16,12 +16,16 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using ExcelBot.Helpers;
 using Microsoft.Bot.Builder.FormFlow;
+using ExcelBot.Wit;
 
 namespace ExcelBot.Dialogs
 {
     [Serializable]
     public class GraphDialog : LuisDialog<object>
     {
+        // #wit: uncomment below line to use wit.ai
+        public GraphDialog() : base(new WitAiLuisService("wit-ai-token")) { }
+
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task StartAsync(IDialogContext context)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

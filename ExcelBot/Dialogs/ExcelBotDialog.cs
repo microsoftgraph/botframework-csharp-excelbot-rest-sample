@@ -23,6 +23,7 @@ using ExcelBot.Helpers;
 
 namespace ExcelBot.Dialogs
 {
+    // #wit : comment below line, if you are usign wit.ai
     [LuisModel("LUIS MODEL ID", "LUIS SUBSCRIPTION KEY", LuisApiVersion.V2)]
     [Serializable]
     public partial class ExcelBotDialog : GraphDialog
