@@ -34,7 +34,7 @@ namespace ExcelBot.Helpers
                     separator = " ";
                     ++index;
                 }
-                return name.ToString().Replace(" _ ","_").Replace(" - ", "-");
+                return name.ToString().Replace(" _ ", "_").Replace(" - ", "-");
             }
             else
             {
@@ -74,9 +74,20 @@ namespace ExcelBot.Helpers
             var first = result.Entities.FirstOrDefault(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook")));
             if (first != null)
             {
-                var startIndex = (int)(result.Entities.Where(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook"))).Min(er => er.StartIndex));
-                var endIndex = (int)(result.Entities.Where(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook"))).Max(er => er.EndIndex));
-                return result.Query.Substring(startIndex, endIndex - startIndex + 1);
+                /*
+                 * Checking for null value in StartIndex. Result returned by wit does not contain StartIndex and EndIndex or Entities.
+                 * Hence, in such case, we pick up the entity directly. 
+                 */
+                if (result.Entities[0].StartIndex != null)
+                {
+                    var startIndex = (int)(result.Entities.Where(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook"))).Min(er => er.StartIndex));
+                    var endIndex = (int)(result.Entities.Where(er => ((er.Type == "builtin.number") || (er.Type == "Text") || (er.Type == "Workbook"))).Max(er => er.EndIndex));
+                    return result.Query.Substring(startIndex, endIndex - startIndex + 1);
+                }
+                else
+                {
+                    return result.Entities[0].Entity;
+                }
             }
 
             // Check for a number value

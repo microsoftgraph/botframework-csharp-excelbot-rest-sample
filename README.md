@@ -24,10 +24,10 @@ Complete the these steps to setup your development environment to build and test
     - Assign the following Delegated Permissions to the app: Sign in and read user profile (User.Read), Have full access to user files (Files.ReadWrite)
     - Add the bots host name to the list of Reply URLs using the format https://BOT HOST NAME
   * Copy the Azure Active Directory Client Id and Secret to the Web.config file
-  * Create a new model in the [LUIS](http://luis.ai) service
-  * Import the LUIS\excelbot.json file into LUIS
-  * Train and publish the LUIS model
-  * Copy the LUIS model id and subscription key to the Dialogs\ExcelBotDialog.cs file
+  * (LUIS) Create a new model in the [LUIS](http://luis.ai) service
+  * (LUIS) Import the LUIS\excelbot.json file into LUIS
+  * (LUIS) Train and publish the LUIS model
+  * (LUIS) Copy the LUIS model id and subscription key to the Dialogs\ExcelBotDialog.cs file
   * (Optional) Enable Web Chat for the bot in the Bot Framework and copy the Web Chat embed template the chat.htm file
   * (Optional) To get the bot to send telemetry to [Visual Studio Application Insights](https://azure.microsoft.com/en-us/services/application-insights/), copy the instrumentation key to the following files: ApplicationInsights.config, default.htm, loggedin.htm, chat.htm
   * Build the solution
@@ -37,7 +37,16 @@ Complete the these steps to setup your development environment to build and test
   * Replace the bots host name in the Web.config file
   * Publish the solution to the Azure web app
   * Test the deployed bot using the Web Chat control by browsing to the chat.htm page  
-  
+
+  ### Using wit.ai instead of LUIS ###
+  * Skip the step marked as (LUIS)
+  * create new app in wit.ai. While creating new app, import /Wit/wit-ai-app-data/rcexcelbot.zip for training your app
+  * Comment following line in file ExcelBotDialog.cs
+  > [LuisModel("LUIS MODEL ID", "LUIS SUBSCRIPTION KEY", LuisApiVersion.V2)]
+  * Uncomment line in file GraphDialog.cs
+  >public GraphDialog() : base(new WitAiLuisService("wit-ai-token")) { }
+  * Copy wit.ai token to GraphDialog.cs "wit-ai-token"
+
 ## Give us your feedback
 
 Your feedback is important to us.  
@@ -47,4 +56,3 @@ Check out the sample code and let us know about any questions and issues you fin
 ## Copyright
 
 Copyright (c) 2016 Microsoft. All rights reserved.
-  
