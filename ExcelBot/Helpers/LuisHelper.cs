@@ -107,5 +107,47 @@ namespace ExcelBot.Helpers
             var filename = sb.ToString().Replace(" _ ", "_").Replace(" - ", "-");
             return filename;
         }
+
+        public static object[] GetTableRow(IList<EntityRecommendation> entities, string query)
+        {
+            var items = new List<object>();
+            var sb = new StringBuilder();
+            var separator = "";
+            foreach (var entity in entities.OrderBy<EntityRecommendation, int?>(e => e.StartIndex))
+            {
+                if (entity.Type.ToLower() == "text")
+                {
+                    if ((entity.Entity == ",") || (entity.Entity == ";"))
+                    {
+                        if (sb.Length > 0)
+                        {
+                            items.Add(sb.ToString());
+                            sb.Clear();
+                            separator = "";
+                        }
+                    }
+                    else
+                    {
+                        sb.Append($"{separator}{query.Substring(entity.StartIndex ?? 0, entity.EndIndex - entity.StartIndex + 1 ?? 0)}");
+                        separator = " ";
+                    }
+                } 
+                else if (entity.Type.ToLower() == "builtin.number")
+                {
+                    if (sb.Length > 0)
+                    {
+                        items.Add(sb.ToString());
+                        sb.Clear();
+                        separator = "";
+                    }
+                    items.Add(Double.Parse(entity.Entity));
+                }
+            }
+            if (sb.Length > 0)
+            {
+                items.Add(sb.ToString());
+            }
+            return items.ToArray();
+        }
     }
 }

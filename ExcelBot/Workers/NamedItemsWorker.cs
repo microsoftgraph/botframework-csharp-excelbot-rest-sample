@@ -24,7 +24,7 @@ namespace ExcelBot.Workers
         #region List Named Items
         public static async Task DoListNamedItems(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
 
             try
             {
@@ -67,10 +67,10 @@ namespace ExcelBot.Workers
         #region Get Value of Named Item
         public static async Task DoGetNamedItemValue(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
-            var name = context.UserData.Get<string>("Name");
-            var type = context.UserData.Get<ObjectType>("Type");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
+            var name = context.UserData.GetValue<string>("Name");
+            var type = context.UserData.GetValue<ObjectType>("Type");
 
             // Check if the name refers to a cell
             if (type == ObjectType.Cell)
@@ -118,14 +118,14 @@ namespace ExcelBot.Workers
         #region Set Value of Named Item
         public static async Task DoSetNamedItemValue(IDialogContext context, object value)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var type = context.UserData.Get<ObjectType>("Type");
-            var name = context.UserData.Get<string>("Name");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var type = context.UserData.GetValue<ObjectType>("Type");
+            var name = context.UserData.GetValue<string>("Name");
 
             switch (type)
             {
                 case ObjectType.Cell:
-                    var worksheetId = context.UserData.Get<string>("WorksheetId");
+                    var worksheetId = context.UserData.GetValue<string>("WorksheetId");
                     await CellWorker.SetCellValue(context, workbookId, worksheetId, name, value);
                     break;
                 case ObjectType.NamedItem:
@@ -135,7 +135,7 @@ namespace ExcelBot.Workers
                     await context.PostAsync($"I am not able to set the value of **{name}** because it is a chart");
                     break;
                 case ObjectType.Table:
-                    var tableName = context.UserData.Get<string>("TableName");
+                    var tableName = context.UserData.GetValue<string>("TableName");
 
                     int? rowIndex = null;
                     context.UserData.TryGetValue<int?>("RowIndex", out rowIndex);

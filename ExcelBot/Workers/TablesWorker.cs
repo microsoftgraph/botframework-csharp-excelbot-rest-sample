@@ -23,7 +23,7 @@ namespace ExcelBot.Workers
         #region List Tables
         public static async Task DoListTables(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
 
             try
             {
@@ -66,7 +66,7 @@ namespace ExcelBot.Workers
         #region Lookup Table Row
         public static async Task DoLookupTableRow(IDialogContext context, string value)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
 
             string tableName = string.Empty;
             context.UserData.TryGetValue<string>("TableName", out tableName);
@@ -155,6 +155,87 @@ namespace ExcelBot.Workers
             catch (Exception ex)
             {
                 await context.PostAsync($"Sorry, something went wrong looking up the table row ({ex.Message})");
+            }
+        }
+        #endregion
+
+        #region Add Table Row
+        public static async Task DoAddTableRow(IDialogContext context, object[] rows)
+        {
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+
+            string tableName = string.Empty;
+            context.UserData.TryGetValue<string>("TableName", out tableName);
+
+            try
+            {
+                if ((tableName != null) && (tableName != string.Empty))
+                {
+                    Table table = null;
+
+                    try
+                    {
+                        table = await ServicesHelper.ExcelService.GetTableAsync(
+                                        workbookId, tableName,
+                                        ExcelHelper.GetSessionIdForRead(context));
+                        await ServicesHelper.LogExcelServiceResponse(context);
+                    }
+                    catch
+                    {
+                    }
+
+                    if (table != null)
+                    {
+                        // Get number of columns in table
+                        var tableHeaderRange = await ServicesHelper.ExcelService.GetTableHeaderRowRangeAsync(
+                                                    workbookId, tableName,
+                                                    ExcelHelper.GetSessionIdForRead(context));
+                        await ServicesHelper.LogExcelServiceResponse(context);
+
+                        // Ensure that the row to be added has the right number of values. Add additional values, if needed
+                        var checkedRows = new List<object>(); 
+                        foreach (object[] uncheckedRow in rows)
+                        {
+                            if (uncheckedRow.Length < tableHeaderRange.ColumnCount)
+                            {
+                                var checkedRow = uncheckedRow.ToList();
+                                while (checkedRow.Count < tableHeaderRange.ColumnCount)
+                                {
+                                    checkedRow.Add(null);
+                                }
+                                checkedRows.Add(checkedRow.ToArray());
+                            } 
+                            else
+                            {
+                                checkedRows.Add(uncheckedRow);
+                            }
+                        }
+                        // Add row
+                        var row = await ServicesHelper.ExcelService.AddTableRowAsync(workbookId, tableName, checkedRows.ToArray(), null, await ExcelHelper.GetSessionIdForUpdateAsync(context));
+                        await ServicesHelper.LogExcelServiceResponse(context);
+
+                        await context.PostAsync($"Added a new row to **{table.Name}**");
+
+                        var range = await ServicesHelper.ExcelService.GetTableDataBodyRangeAsync(
+                            workbookId, tableName,
+                            ExcelHelper.GetSessionIdForRead(context));
+                        await ServicesHelper.LogExcelServiceResponse(context);
+
+                        await ReplyWithTableRow(context, workbookId, table, range.Text[row.Index ?? 0]);
+                    }
+                    else
+                    {
+                        await context.PostAsync($"**{tableName}** is not a table in the workbook");
+                    }
+                }
+                else
+                {
+                    await context.PostAsync($"Need the name of a table to add a row");
+                }
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync($"Sorry, something went wrong adding the table row ({ex.Message})");
             }
         }
         #endregion

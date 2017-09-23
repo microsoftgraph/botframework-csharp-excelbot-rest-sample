@@ -20,9 +20,9 @@ namespace ExcelBot.Workers
         #region Get Cell Values
         public static async Task DoGetCellValue(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
-            var cellAddress = context.UserData.Get<string>("CellAddress");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
+            var cellAddress = context.UserData.GetValue<string>("CellAddress");
 
             await ReplyWithValue(context, workbookId, worksheetId, cellAddress);
         }
@@ -31,27 +31,27 @@ namespace ExcelBot.Workers
         #region Set Cell Values
         public static async Task DoSetCellNumberValue(IDialogContext context, double value)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
-            var cellAddress = context.UserData.Get<string>("CellAddress");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
+            var cellAddress = context.UserData.GetValue<string>("CellAddress");
 
             await SetCellValue(context, workbookId, worksheetId, cellAddress, value);
         }
 
         public static async Task DoSetCellStringValue(IDialogContext context, string value)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
-            var cellAddress = context.UserData.Get<string>("CellAddress");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
+            var cellAddress = context.UserData.GetValue<string>("CellAddress");
 
             await SetCellValue(context, workbookId, worksheetId, cellAddress, value);
         }
 
         public static async Task DoSetCellValue(IDialogContext context, object value)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
-            var cellAddress = context.UserData.Get<string>("CellAddress");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
+            var cellAddress = context.UserData.GetValue<string>("CellAddress");
 
             await SetCellValue(context, workbookId, worksheetId, cellAddress, value);
         }

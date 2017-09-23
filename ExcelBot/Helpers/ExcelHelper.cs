@@ -23,7 +23,7 @@ namespace ExcelBot.Helpers
             string workbookWebUrl = String.Empty;
             if (context.ConversationData.TryGetValue<string>("WorkbookWebUrl", out workbookWebUrl))
             {
-                var workbookName = context.ConversationData.Get<string>("WorkbookName");
+                var workbookName = context.ConversationData.GetValue<string>("WorkbookName");
                 return $"[{workbookName}]({workbookWebUrl})";
             }
             else
@@ -75,7 +75,7 @@ namespace ExcelBot.Helpers
 
         private static async Task<string> CreateSession(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
             var sessionId = (await ServicesHelper.ExcelService.CreateSessionAsync(workbookId)).Id;
             await ServicesHelper.LogExcelServiceResponse(context);
 
@@ -91,7 +91,7 @@ namespace ExcelBot.Helpers
             if (context.ConversationData.TryGetValue<string>("SessionId", out sessionId))
             {
                 // Check that the session is for the right workbook
-                var workbookId = context.UserData.Get<string>("WorkbookId");
+                var workbookId = context.UserData.GetValue<string>("WorkbookId");
 
                 var sessionWorkbookId = "";
                 if ((context.ConversationData.TryGetValue<string>("SessionWorkbookId", out sessionWorkbookId)) && (workbookId != sessionWorkbookId))

@@ -25,8 +25,8 @@ namespace ExcelBot.Workers
         #region List Charts
         public static async Task DoListCharts(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
 
             try
             {
@@ -68,9 +68,9 @@ namespace ExcelBot.Workers
         #region Get the Image of a Chart
         public static async Task DoGetChartImage(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
-            var name = context.UserData.Get<string>("ChartName");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
+            var name = context.UserData.GetValue<string>("ChartName");
 
             // Get the chart
             var chart = await GetChart(context, workbookId, worksheetId, name);

@@ -23,8 +23,8 @@ namespace ExcelBot.Workers
         #region List Worksheets
         public static async Task DoListWorksheetsAsync(IDialogContext context)
         {
-            var workbookId = context.UserData.Get<string>("WorkbookId");
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
+            var workbookId = context.UserData.GetValue<string>("WorkbookId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
 
             try
             {
@@ -64,8 +64,8 @@ namespace ExcelBot.Workers
         {
             try
             {
-                var workbookId = context.UserData.Get<string>("WorkbookId");
-                var worksheetId = context.UserData.Get<string>("WorksheetId");
+                var workbookId = context.UserData.GetValue<string>("WorkbookId");
+                var worksheetId = context.UserData.GetValue<string>("WorksheetId");
 
                 // Check if we are already working with the new worksheet
                 if (worksheetName.ToLower() == worksheetId.ToLower())
@@ -104,7 +104,7 @@ namespace ExcelBot.Workers
         #region Get Active Worksheet
         public static async Task DoGetActiveWorksheetAsync(IDialogContext context)
         {
-            var worksheetId = context.UserData.Get<string>("WorksheetId");
+            var worksheetId = context.UserData.GetValue<string>("WorksheetId");
 
             // Respond 
             await context.PostAsync($"We are on the **{worksheetId}** worksheet");

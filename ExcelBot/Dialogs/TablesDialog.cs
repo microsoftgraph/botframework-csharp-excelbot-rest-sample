@@ -21,6 +21,7 @@ namespace ExcelBot.Dialogs
     public partial class ExcelBotDialog : GraphDialog
     {
         #region Properties
+        internal object[] Rows { get; set; }
         #endregion
 
         #region Intents
@@ -90,6 +91,53 @@ namespace ExcelBot.Dialogs
             if (await result)
             {
                 await TablesWorker.DoLookupTableRow(context, (string)Value);
+            }
+            context.Wait(MessageReceived);
+        }
+
+        #endregion
+        #region - Add Table Row
+        [LuisIntent("addTableRow")]
+        public async Task AddTableRow(IDialogContext context, LuisResult result)
+        {
+            // Telemetry
+            TelemetryHelper.TrackDialog(context, result, "Tables", "AddTableRow");
+
+            // Extract the name of the table from the query and save it 
+            var name = LuisHelper.GetNameEntity(result.Entities);
+            if (name != null)
+            {
+                context.UserData.SetValue<string>("TableName", name);
+
+                context.UserData.SetValue<ObjectType>("Type", ObjectType.Table);
+                context.UserData.SetValue<string>("Name", name);
+            }
+
+            // Get the new table row from the query and persist it in the dialog
+            Rows = new object[]
+                {
+                    LuisHelper.GetTableRow(result.Entities, result.Query)
+                };
+
+            // Check if there is an open workbook and add the row to the table
+            string workbookId = String.Empty;
+            context.UserData.TryGetValue<string>("WorkbookId", out workbookId);
+
+            if (!(String.IsNullOrEmpty(workbookId)))
+            {
+                await TablesWorker.DoAddTableRow(context, Rows);
+                context.Wait(MessageReceived);
+            }
+            else
+            {
+                context.Call<bool>(new ConfirmOpenWorkbookDialog(), AfterConfirm_AddTableRow);
+            }
+        }
+        public async Task AfterConfirm_AddTableRow(IDialogContext context, IAwaitable<bool> result)
+        {
+            if (await result)
+            {
+                await TablesWorker.DoAddTableRow(context, Rows);
             }
             context.Wait(MessageReceived);
         }

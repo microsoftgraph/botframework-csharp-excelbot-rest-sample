@@ -98,6 +98,7 @@ namespace ExcelBot.Dialogs
 * List the tables in the workbook. For example, type ""Show me the tables""
 * Show the rows in a table. For example, type ""Show customers""
 * Look up a row in a table. For example, type ""Lookup Contoso in customers"" or ""lookup Contoso"" 
+* Add a row to a table. For example, type ""Add breakfast for $10 to expenses""
 * Change the value of a cell in a table row. For example, first type ""lookup contoso in customers"", then type ""change segment to enterprise""
 * List the charts in the workbook. For example, type ""Which charts are in the workbook?""
 * Get the image of a chart. For example, type ""Show me Chart 1""");
