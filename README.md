@@ -1,3 +1,4 @@
+
 # Excel Bot
 
 Excel Bot is a sample that demonstrates how to use the [Microsoft Graph](https://graph.microsoft.io) and specifically the [Excel REST API](https://graph.microsoft.io/en-us/docs/api-reference/v1.0/resources/excel) to access Excel workbooks stored in OneDrive for Business through a conversational user interface. It is written in C# and it uses the [Microsoft Bot Framework](https://dev.botframework.com/) and the [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai/).
@@ -43,6 +44,8 @@ Complete the these steps to setup your development environment to build and test
 Your feedback is important to us.  
 
 Check out the sample code and let us know about any questions and issues you find by [submitting an issue](https://github.com/microsoftgraph/botframework-csharp-excelbot-rest-sample/issues) directly in this repository. Provide repro steps, console output, and error messages in any issue you open.
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## Copyright
 
