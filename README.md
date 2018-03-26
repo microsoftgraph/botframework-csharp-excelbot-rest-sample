@@ -18,13 +18,14 @@ Complete the these steps to setup your development environment to build and test
 
   * Clone this repo to a local folder
   * Clone and build the [Excel REST API Explorer](https://github.com/microsoftgraph/uwp-csharp-excel-snippets-rest-sample) sample to the same folder. Excel Bot uses a library in the Excel REST API Explorer project to make the REST API calls to the Microsoft Graph.
+  * Rename the **./ExcelBot/PrivateSettings.config.example** file to **PrivateSettings.config**.
   * Open the ExcelBot.sln solution file
   * Register the bot in the [Bot Framework](https://dev.botframework.com/bots/new)
-  * Copy the bot MicrosoftAppId and MicrosoftAppPassword to the Web.config file
+  * Copy the bot MicrosoftAppId and MicrosoftAppPassword to the PrivateSettings.config file
   * [Register the bot to call the Microsoft Graph](http://dev.office.com/app-registration)
     - Assign the following Delegated Permissions to the app: Sign in and read user profile (User.Read), Have full access to user files (Files.ReadWrite)
     - Add the bots host name to the list of Reply URLs using the format https://BOT HOST NAME
-  * Copy the Azure Active Directory Client Id and Secret to the Web.config file
+  * Copy the Azure Active Directory Client Id and Secret to the PrivateSettings.config file
   * Create a new model in the [LUIS](https://www.luis.ai) service
   * Import the LUIS\excelbot.json file into LUIS
   * Train and publish the LUIS model
@@ -35,7 +36,7 @@ Complete the these steps to setup your development environment to build and test
   * Press F5 to start the bot locally
   * Test the bot locally with the [Bot Framework Emulator](https://docs.botframework.com/en-us/tools/bot-framework-emulator)
   * Create a web app in Azure
-  * Replace the bots host name in the Web.config file
+  * Replace the bots host name in the PrivateSettings.config file
   * Publish the solution to the Azure web app
   * Test the deployed bot using the Web Chat control by browsing to the chat.htm page  
   
