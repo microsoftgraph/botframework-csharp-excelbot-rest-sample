@@ -2,9 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/config
 /ExcelBot/bin
 /ExcelBot/obj
 /packages
-/.vs/ExcelBot/v14
 /ExcelBotEmbedded/ExcelBotEmbedded/bin
+/.vs
