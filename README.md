@@ -25,7 +25,7 @@ Complete the these steps to setup your development environment to build and test
     - Assign the following Delegated Permissions to the app: Sign in and read user profile (User.Read), Have full access to user files (Files.ReadWrite)
     - Add the bots host name to the list of Reply URLs using the format https://BOT HOST NAME
   * Copy the Azure Active Directory Client Id and Secret to the Web.config file
-  * Create a new model in the [LUIS](http://luis.ai) service
+  * Create a new model in the [LUIS](https://www.luis.ai) service
   * Import the LUIS\excelbot.json file into LUIS
   * Train and publish the LUIS model
   * Copy the LUIS model id and subscription key to the Dialogs\ExcelBotDialog.cs file
