@@ -245,6 +245,7 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+    <Content Include="PrivateSettings.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\uwp-csharp-excel-snippets-rest-sample\src\ExcelRESTService.Portable\ExcelRESTService.Portable.csproj">
