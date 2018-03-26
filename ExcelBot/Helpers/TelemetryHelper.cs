@@ -3,18 +3,13 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
-
 using Microsoft.ApplicationInsights;
-
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
+using System.Collections.Generic;
+using System.Text;
+using System.Web;
 
 namespace ExcelBot.Helpers
 {

@@ -3,19 +3,15 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Configuration;
-
 using AuthBot;
 using AuthBot.Dialogs;
-using AuthBot.Models;
-
+using ExcelBot.Helpers;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
-using ExcelBot.Helpers;
-using Microsoft.Bot.Builder.FormFlow;
+using System;
+using System.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ExcelBot.Dialogs
 {

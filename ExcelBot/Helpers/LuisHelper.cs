@@ -3,13 +3,11 @@
  * See LICENSE in the project root for license information.
  */
 
+using Microsoft.Bot.Builder.Luis.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web;
-
-using Microsoft.Bot.Builder.Luis.Models;
 
 namespace ExcelBot.Helpers
 {

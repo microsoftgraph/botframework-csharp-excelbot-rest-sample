@@ -3,21 +3,16 @@
  * See LICENSE in the project root for license information.
  */
 
+using ExcelBot.Helpers;
+using ExcelBot.Model;
+using Microsoft.Bot.Connector;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Web;
-using System.Web.Http;
-using System.Threading.Tasks;
-using System.IO;
 using System.Net.Http.Headers;
-
-using ExcelBot.Helpers;
-using Microsoft.Bot.Connector;
-using ExcelBot.Model;
+using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace ExcelBot
 {
