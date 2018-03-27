@@ -42,11 +42,11 @@ namespace ExcelBot
                     throw new ArgumentException("User nounce not found");
                 }
 
-                AuthBot.Models.AuthResult authResult = null;
+                BotAuth.Models.AuthResult authResult = null;
                 try
                 {
                     var userData = stateClient.BotState.GetUserData(channelId, userId);
-                    authResult = userData.GetProperty<AuthBot.Models.AuthResult>(AuthBot.ContextConstants.AuthResultKey);
+                    authResult = userData.GetProperty<BotAuth.Models.AuthResult>(BotAuth.ContextConstants.AuthResultKey);
                 }
                 catch
                 {

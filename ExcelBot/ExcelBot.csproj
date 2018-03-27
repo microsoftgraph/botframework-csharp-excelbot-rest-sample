@@ -43,11 +43,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AuthBot, Version=3.6.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AuthBot.3.6.5-alpha\lib\net40\AuthBot.dll</HintPath>
-    </Reference>
     <Reference Include="Autofac, Version=4.6.2.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <HintPath>..\packages\Autofac.4.6.2\lib\net45\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="BotAuth, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BotAuth.3.11.0-alpha\lib\net46\BotAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="BotAuth.AADv2, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BotAuth.AADv2.3.11.0-alpha\lib\net46\BotAuth.AADv2.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AI.Agent.Intercept, Version=2.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ApplicationInsights.Agent.Intercept.2.4.0\lib\net45\Microsoft.AI.Agent.Intercept.dll</HintPath>
@@ -83,19 +86,8 @@
       <HintPath>..\packages\Microsoft.Bot.Connector.3.14.1.1\lib\net46\Microsoft.Bot.Connector.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Identity.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Identity.Client.1.0.304142221-alpha\lib\net45\Microsoft.Identity.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Identity.Client.Platform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Identity.Client.1.0.304142221-alpha\lib\net45\Microsoft.Identity.Client.Platform.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=3.19.2.6005, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.19.2\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.Platform, Version=3.19.2.6005, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.3.19.2\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll</HintPath>
+    <Reference Include="Microsoft.Identity.Client, Version=1.1.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Identity.Client.1.1.0-preview\lib\net45\Microsoft.Identity.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Logging, Version=5.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.2.1\lib\net451\Microsoft.IdentityModel.Logging.dll</HintPath>

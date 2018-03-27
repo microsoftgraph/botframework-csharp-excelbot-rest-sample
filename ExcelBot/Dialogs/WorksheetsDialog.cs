@@ -3,7 +3,6 @@
  * See LICENSE in the project root for license information.
  */
 
-using AuthBot;
 using ExcelBot.Forms;
 using ExcelBot.Helpers;
 using ExcelBot.Workers;
@@ -11,7 +10,6 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Builder.Luis.Models;
 using System;
-using System.Configuration;
 using System.Threading.Tasks;
 
 namespace ExcelBot.Dialogs
@@ -91,7 +89,7 @@ namespace ExcelBot.Dialogs
             if (await result)
             {
                 // Get access token to see if user is authenticated
-                ServicesHelper.AccessToken = await context.GetAccessToken(ConfigurationManager.AppSettings["ActiveDirectory.ResourceId"]);
+                ServicesHelper.AccessToken = await GetAccessToken(context);
 
                 string workbookId = String.Empty;
                 context.UserData.TryGetValue<string>("WorkbookId", out workbookId);
@@ -120,7 +118,7 @@ namespace ExcelBot.Dialogs
             if (form != null)
             {
                 // Get access token to see if user is authenticated
-                ServicesHelper.AccessToken = await context.GetAccessToken(ConfigurationManager.AppSettings["ActiveDirectory.ResourceId"]);
+                ServicesHelper.AccessToken = await GetAccessToken(context);
 
                 // Select worksheet
                 await WorksheetWorker.DoSelectWorksheetAsync(context, form.WorksheetName);
