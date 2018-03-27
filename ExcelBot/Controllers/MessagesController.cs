@@ -3,19 +3,15 @@
  * See LICENSE in the project root for license information.
  */
 
+using ExcelBot.Dialogs;
+using ExcelBot.Helpers;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-
-using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
-
-using ExcelBot.Dialogs;
-using ExcelBot.Helpers;
-using System.Web;
 
 namespace ExcelBot
 {

@@ -3,21 +3,16 @@
  * See LICENSE in the project root for license information.
  */
 
+using ExcelBot.Helpers;
+using ExcelBot.Model;
+using Microsoft.Bot.Connector;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Web;
-using System.Web.Http;
-using System.Threading.Tasks;
-using System.IO;
 using System.Net.Http.Headers;
-
-using ExcelBot.Helpers;
-using Microsoft.Bot.Connector;
-using ExcelBot.Model;
+using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace ExcelBot
 {
@@ -47,11 +42,11 @@ namespace ExcelBot
                     throw new ArgumentException("User nounce not found");
                 }
 
-                AuthBot.Models.AuthResult authResult = null;
+                BotAuth.Models.AuthResult authResult = null;
                 try
                 {
                     var userData = stateClient.BotState.GetUserData(channelId, userId);
-                    authResult = userData.GetProperty<AuthBot.Models.AuthResult>(AuthBot.ContextConstants.AuthResultKey);
+                    authResult = userData.GetProperty<BotAuth.Models.AuthResult>(BotAuth.ContextConstants.AuthResultKey);
                 }
                 catch
                 {

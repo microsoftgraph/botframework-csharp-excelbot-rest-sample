@@ -3,23 +3,12 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Threading.Tasks;
-using System.Text;
-using System.Configuration;
-
+using ExcelBot.Helpers;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
-
-using AuthBot;
-using AuthBot.Dialogs;
-using AuthBot.Models;
-
-using ExcelBot.Helpers;
+using System;
+using System.Threading.Tasks;
 
 namespace ExcelBot.Dialogs
 {

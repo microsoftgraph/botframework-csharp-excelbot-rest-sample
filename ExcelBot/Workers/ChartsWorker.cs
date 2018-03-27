@@ -3,20 +3,15 @@
  * See LICENSE in the project root for license information.
  */
 
+using ExcelBot.Helpers;
+using ExcelBot.Model;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Connector;
+using Microsoft.ExcelServices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-
-using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
-
-using Microsoft.ExcelServices;
-
-using ExcelBot.Helpers;
-using ExcelBot.Model;
 
 namespace ExcelBot.Workers
 {
