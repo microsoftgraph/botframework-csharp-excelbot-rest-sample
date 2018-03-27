@@ -22,9 +22,7 @@ Complete the these steps to setup your development environment to build and test
   * Open the ExcelBot.sln solution file
   * Register the bot in the [Bot Framework](https://dev.botframework.com/bots/new)
   * Copy the bot MicrosoftAppId and MicrosoftAppPassword to the PrivateSettings.config file
-  * [Register the bot to call the Microsoft Graph](http://dev.office.com/app-registration)
-    - Assign the following Delegated Permissions to the app: Sign in and read user profile (User.Read), Have full access to user files (Files.ReadWrite)
-    - Add the bots host name to the list of Reply URLs using the format https://BOT HOST NAME
+  * [Register the bot to call the Microsoft Graph](#register-bot-to-call-graph)
   * Copy the Azure Active Directory Client Id and Secret to the PrivateSettings.config file
   * Create a new model in the [LUIS](https://www.luis.ai) service
   * Import the LUIS\excelbot.json file into LUIS
@@ -39,7 +37,17 @@ Complete the these steps to setup your development environment to build and test
   * Replace the bots host name in the PrivateSettings.config file
   * Publish the solution to the Azure web app
   * Test the deployed bot using the Web Chat control by browsing to the chat.htm page  
-  
+
+### Register bot to call Graph
+
+Head over to the [Application Registration Portal](https://apps.dev.microsoft.com/) to quickly get an application ID and secret. 
+
+1. Using the **Sign in** link, sign in with either your Microsoft account (Outlook.com), or your work or school account (Office 365).
+1. Click the **Add an app** button. Enter a name and click **Create application**. 
+1. Locate the **Application Secrets** section, and click the **Generate New Password** button. Copy the password now and save it to a safe place. Once you've copied the password, click **Ok**.
+1. Locate the **Platforms** section, and click **Add Platform**. Choose **Web**, then enter `http://<BOT_HOST_NAME>/callback`, replacing `<BOT_HOST_NAME>` with the hostname for your bot under **Redirect URIs**.
+1. Click **Save** to complete the registration. Copy the **Application Id** and save it along with the password you copied earlier. We'll need those values soon.
+
 ## Give us your feedback
 
 Your feedback is important to us.  

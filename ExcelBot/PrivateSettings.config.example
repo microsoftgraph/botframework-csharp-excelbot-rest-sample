@@ -5,5 +5,5 @@
   <!-- update these with your app ID registration information -->
   <add key="ActiveDirectory.ClientId" value="AD CLIENT ID" />
   <add key="ActiveDirectory.ClientSecret" value="AD CLIENT SECRET" />
-  <add key="ActiveDirectory.RedirectUrl" value="https://BOT HOST NAME/api/OAuthCallback" />
+  <add key="ActiveDirectory.RedirectUrl" value="https://BOT HOST NAME/callback" />
 </appSettings>
