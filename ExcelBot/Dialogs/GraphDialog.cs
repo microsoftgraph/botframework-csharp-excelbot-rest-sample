@@ -72,8 +72,8 @@ namespace ExcelBot.Dialogs
         private async Task ResumeAfterAuth(IDialogContext context, IAwaitable<AuthResult> result)
         {
             var message = await result;
-
-            await context.PostAsync("");
+            
+            await context.PostAsync("Now that you're logged in, what can I do for you?");
             context.Wait(MessageReceived);
         }
     }
