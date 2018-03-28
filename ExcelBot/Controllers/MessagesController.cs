@@ -3,13 +3,16 @@
  * See LICENSE in the project root for license information.
  */
 
+using Autofac;
 using ExcelBot.Dialogs;
 using ExcelBot.Helpers;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Internals;
 using Microsoft.Bot.Connector;
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 
@@ -46,35 +49,45 @@ namespace ExcelBot
                 }
             }
 
-            // Process the message
-            if ((activity.Type == ActivityTypes.Message) && (activity.Text.StartsWith("!")))
+            using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, activity))
             {
-                var reply = HandleCommandMessage(activity);
-                await connector.Conversations.ReplyToActivityAsync(reply);
-            }
-            else if (activity.Type == ActivityTypes.Message)
-            {
-                ServicesHelper.StartLogging(activity);
+                var botDataStore = scope.Resolve<IBotDataStore<BotData>>();
+                var key = Address.FromActivity(activity);
 
-                // Send isTyping message
-                var reply = activity.CreateReply(String.Empty);
-                reply.Type = ActivityTypes.Typing;
-                await connector.Conversations.ReplyToActivityAsync(reply);
+                var conversationData = await botDataStore.LoadAsync(key, BotStoreType.BotConversationData, CancellationToken.None);
 
-                // Process message
-                await Conversation.SendAsync(activity, () => new ExcelBotDialog());
+                // Process the message
+                if ((activity.Type == ActivityTypes.Message) && (activity.Text.StartsWith("!")))
+                {
+                    var reply = HandleCommandMessage(activity, conversationData);
+                    await botDataStore.SaveAsync(key, BotStoreType.BotConversationData, conversationData, CancellationToken.None);
+                    await botDataStore.FlushAsync(key, CancellationToken.None);
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                }
+                else if (activity.Type == ActivityTypes.Message)
+                {
+                    var verbose = conversationData.GetProperty<bool>("Verbose");
+                    ServicesHelper.StartLogging(verbose);
+
+                    // Send isTyping message
+                    var reply = activity.CreateReply(String.Empty);
+                    reply.Type = ActivityTypes.Typing;
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+
+                    // Process message
+                    await Conversation.SendAsync(activity, () => new ExcelBotDialog());
+                }
+                else
+                {
+                    HandleSystemMessage(activity);
+                }
             }
-            else
-            {
-                HandleSystemMessage(activity);
-            }
+
             return Request.CreateResponse(HttpStatusCode.OK);
         }
 
-        private Activity HandleCommandMessage(Activity activity)
+        private Activity HandleCommandMessage(Activity activity, BotData conversationData)
         {
-            StateClient stateClient = activity.GetStateClient();
-
             Activity reply = activity.CreateReply();
 
             var messageParts = activity.Text.ToLower().Split(' ');
@@ -84,23 +97,18 @@ namespace ExcelBot
                 case "!verbose":
                     if ((messageParts.Length >= 2) && (messageParts[1] == "on"))
                     {
-                        var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
-                        conversationData.SetProperty<bool>("Verbose", true);
-                        stateClient.BotState.SetConversationData(activity.ChannelId, activity.Conversation.Id, conversationData);
+                        conversationData.SetProperty("Verbose", true);
                         reply.Text = @"Verbose mode is **On**";
                     }
                     else if ((messageParts.Length >= 2) && (messageParts[1] == "off"))
                     {
-                        var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
-                        conversationData.SetProperty<bool>("Verbose", false);
-                        stateClient.BotState.SetConversationData(activity.ChannelId, activity.Conversation.Id, conversationData);
+                        conversationData.SetProperty("Verbose", false);
                         reply.Text = @"Verbose mode is **Off**";
-                    } 
+                    }
                     else
                     {
-                        var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
                         var verbose = conversationData.GetProperty<bool>("Verbose");
-                        var verboseState = verbose ? "On":"Off";
+                        var verboseState = verbose ? "On" : "Off";
                         reply.Text = $@"Verbose mode is **{verboseState}**";
                     }
                     break;

@@ -5,7 +5,6 @@
 
 using ExcelBot.Helpers;
 using ExcelBot.Model;
-using Microsoft.Bot.Connector;
 using System;
 using System.IO;
 using System.Net;
@@ -25,16 +24,13 @@ namespace ExcelBot
             RequestHelper.RequestUri = Request.RequestUri;
 
             // Get access token
-            var stateClient = (channelId == "emulator") ? 
-                                new StateClient(new Uri("http://localhost:21706"), new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword)) :
-                                new StateClient(new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword));
 
             // Get value of user nonce
             ChartAttachment chartAttachment = null;
 
             try
             {
-                var conversationData = stateClient.BotState.GetConversationData(channelId, conversationId);
+                var conversationData = await BotStateHelper.GetConversationDataAsync(channelId, conversationId);
                 chartAttachment = conversationData.GetProperty<ChartAttachment>(userNonce);
 
                 if (chartAttachment == null)
@@ -45,8 +41,8 @@ namespace ExcelBot
                 BotAuth.Models.AuthResult authResult = null;
                 try
                 {
-                    var userData = stateClient.BotState.GetUserData(channelId, userId);
-                    authResult = userData.GetProperty<BotAuth.Models.AuthResult>(BotAuth.ContextConstants.AuthResultKey);
+                    var userData = await BotStateHelper.GetUserDataAsync(channelId, userId);
+                    authResult = userData.GetProperty<BotAuth.Models.AuthResult>($"MSALAuthProvider{BotAuth.ContextConstants.AuthResultKey}");
                 }
                 catch
                 {
