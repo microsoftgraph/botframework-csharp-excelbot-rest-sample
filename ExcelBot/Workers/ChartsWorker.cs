@@ -117,7 +117,14 @@ namespace ExcelBot.Workers
                 // Replay with chart URL attached
                 var reply = context.MakeMessage();
                 reply.Recipient.Id = (reply.Recipient.Id != null) ? reply.Recipient.Id : (string)(HttpContext.Current.Items["UserId"]);
-                reply.Attachments.Add(new Attachment() { ContentType = "image/png", ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.ChannelId}/{reply.Conversation.Id}/{reply.Recipient.Id}/{userNonce}/image" });
+
+                var image = new Attachment()
+                {
+                    ContentType = "image/png",
+                    ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.ChannelId}/{reply.Conversation.Id}/{reply.Recipient.Id}/{userNonce}/image"
+                };
+
+                reply.Attachments.Add(image);
                 await context.PostAsync(reply);
             }
             catch (Exception ex)

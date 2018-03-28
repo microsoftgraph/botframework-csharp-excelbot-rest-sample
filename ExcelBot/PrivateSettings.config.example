@@ -2,8 +2,14 @@
   <!-- update these with your BotId, Microsoft App Id and your Microsoft App Password-->
   <add key="MicrosoftAppId" value="BOT APP ID" />
   <add key="MicrosoftAppPassword" value="BOT APP PASSWORD" />
+
   <!-- update these with your app ID registration information -->
   <add key="ActiveDirectory.ClientId" value="AD CLIENT ID" />
   <add key="ActiveDirectory.ClientSecret" value="AD CLIENT SECRET" />
   <add key="ActiveDirectory.RedirectUrl" value="https://BOT HOST NAME/callback" />
+
+  <!-- update these with your Cosmos DB URI and key -->
+  <!-- example value are for the Cosmos DB Emulator-->
+  <add key="Database.Uri" value="https://localhost:8081"/>
+  <add key="Database.Key" value="C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="/>
 </appSettings>
