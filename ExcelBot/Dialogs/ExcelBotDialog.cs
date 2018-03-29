@@ -48,8 +48,9 @@ namespace ExcelBot.Dialogs
                 context.PrivateConversationData.TryGetValue<bool>("SaidHello", out saidHello);
 
                 // Get the user data
-                var user = await ServicesHelper.UserService.GetUserAsync();
-                await ServicesHelper.LogUserServiceResponse(context);
+                var userRequest = ServicesHelper.GraphClient.Me.Request();
+                var user = await userRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, userRequest);
 
                 // Respond
                 if (saidHello)

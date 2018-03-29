@@ -117,7 +117,7 @@ namespace ExcelBot.Dialogs
             string workbookId = String.Empty;
             context.UserData.TryGetValue<string>("WorkbookId", out workbookId);
 
-            if (!(String.IsNullOrEmpty(name)))
+            if (!(String.IsNullOrEmpty(workbookId)))
             {
                 string worksheetId = String.Empty;
                 context.UserData.TryGetValue<string>("WorksheetId", out worksheetId);

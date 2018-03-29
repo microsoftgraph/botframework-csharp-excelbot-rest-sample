@@ -182,8 +182,11 @@ namespace ExcelBot.Dialogs
             ObjectType? type = null;
             context.UserData.TryGetValue<ObjectType?>("Type", out type);
 
-            var name = string.Empty;
-            context.UserData.TryGetValue<string>("Name", out name);
+            var name = LuisHelper.GetNameEntity(result.Entities);
+            if (!string.IsNullOrEmpty(name))
+            {
+                context.UserData.SetValue<string>("Name", name);
+            }
 
             Value = LuisHelper.GetValue(result);
 

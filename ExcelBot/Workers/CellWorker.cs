@@ -5,6 +5,8 @@
 
 using ExcelBot.Helpers;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Graph;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 
@@ -57,11 +59,20 @@ namespace ExcelBot.Workers
         {
             try
             {
-                var range = await ServicesHelper.ExcelService.UpdateRangeAsync(
-                    workbookId, worksheetId, cellAddress,
-                    new object[] { new object[] { value } },
+                var newValue = new WorkbookRange()
+                {
+                    Values = JToken.Parse($"[[\"{value}\"]]")
+                };
+
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
                     await ExcelHelper.GetSessionIdForUpdateAsync(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+
+                var updateRangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Worksheets[worksheetId]
+                        .Range(cellAddress).Request(headers);
+
+                var range = await updateRangeRequest.PatchAsync(newValue);
+                await ServicesHelper.LogGraphServiceRequest(context, updateRangeRequest, newValue);
 
                 await context.PostAsync($"**{cellAddress}** is now **{range.Text[0][0]}**");
             }
@@ -75,10 +86,14 @@ namespace ExcelBot.Workers
         {
             try
             {
-                var range = await ServicesHelper.ExcelService.GetRangeAsync(
-                                                workbookId, worksheetId, cellAddress,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var rangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Worksheets[worksheetId].Range(cellAddress).Request(headers);
+
+                var range = await rangeRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, rangeRequest);
 
                 if ((string)(range.ValueTypes[0][0]) != "Empty")
                 {

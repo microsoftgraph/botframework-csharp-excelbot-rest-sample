@@ -6,8 +6,7 @@
 using ExcelBot.Helpers;
 using ExcelBot.Model;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
-using Microsoft.ExcelServices;
+using Microsoft.Graph;
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,22 +24,26 @@ namespace ExcelBot.Workers
 
             try
             {
-                var charts = await ServicesHelper.ExcelService.ListChartsAsync(
-                                                workbookId, worksheetId,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
 
-                if (charts.Length > 0)
+                var chartsRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Worksheets[worksheetId].Charts.Request(headers);
+
+                var charts = await chartsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, chartsRequest);
+
+                if (charts.Count > 0)
                 {
                     var reply = new StringBuilder();
 
-                    if (charts.Length == 1)
+                    if (charts.Count == 1)
                     {
                         reply.Append($"There is **1** chart on **{worksheetId}**:\n");
                     }
                     else
                     {
-                        reply.Append($"There are **{charts.Length}** on **{worksheetId}**:\n");
+                        reply.Append($"There are **{charts.Count}** on **{worksheetId}**:\n");
                     }
 
                     foreach (var chart in charts)
@@ -82,15 +85,19 @@ namespace ExcelBot.Workers
 
         #region Helpers
         // Lookup a name assuming that it is named item, return null if it doesn't exist
-        public static async Task<Chart> GetChart(IDialogContext context, string workbookId, string worksheetId, string name)
+        public static async Task<WorkbookChart> GetChart(IDialogContext context, string workbookId, string worksheetId, string name)
         {
-            Chart chart = null;
+            WorkbookChart chart = null;
             try
             {
-                chart = await ServicesHelper.ExcelService.GetChartAsync(
-                                                workbookId, worksheetId, name,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var chartRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Worksheets[worksheetId].Charts[name].Request(headers);
+
+                chart = await chartRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, chartRequest);
             }
             catch
             {
@@ -98,7 +105,7 @@ namespace ExcelBot.Workers
             return chart;
         }
 
-        public static async Task ReplyWithChart(IDialogContext context, string workbookId, string worksheetId, Chart chart)
+        public static async Task ReplyWithChart(IDialogContext context, string workbookId, string worksheetId, WorkbookChart chart)
         {
             try
             {
@@ -110,15 +117,15 @@ namespace ExcelBot.Workers
                     {
                         WorkbookId = workbookId,
                         WorksheetId = worksheetId,
-                        ChartId = chart.ChartId
+                        ChartId = chart.Id
                     });
                 await context.FlushAsync(context.CancellationToken);
 
-                // Replay with chart URL attached
+                // Reply with chart URL attached
                 var reply = context.MakeMessage();
                 reply.Recipient.Id = (reply.Recipient.Id != null) ? reply.Recipient.Id : (string)(HttpContext.Current.Items["UserId"]);
 
-                var image = new Attachment()
+                var image = new Microsoft.Bot.Connector.Attachment()
                 {
                     ContentType = "image/png",
                     ContentUrl = $"{RequestHelper.RequestUri.Scheme}://{RequestHelper.RequestUri.Authority}/api/{reply.ChannelId}/{reply.Conversation.Id}/{reply.Recipient.Id}/{userNonce}/image"

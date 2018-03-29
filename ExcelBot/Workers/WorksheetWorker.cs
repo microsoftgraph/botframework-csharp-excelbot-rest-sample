@@ -5,7 +5,7 @@
 
 using ExcelBot.Helpers;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.ExcelServices;
+using Microsoft.Graph;
 using System;
 using System.Linq;
 using System.Text;
@@ -23,20 +23,24 @@ namespace ExcelBot.Workers
 
             try
             {
-                var worksheets = await ServicesHelper.ExcelService.ListWorksheetsAsync(
-                                                workbookId,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var worksheetsRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Worksheets.Request(headers);
+
+                var worksheets = await worksheetsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, worksheetsRequest);
 
                 var reply = new StringBuilder();
 
-                if (worksheets.Length == 1)
+                if (worksheets.Count == 1)
                 {
                     reply.Append($"There is **1** worksheet in the workbook:\n");
                 }
                 else
                 {
-                    reply.Append($"There are **{worksheets.Length}** worksheets in the workbook:\n");
+                    reply.Append($"There are **{worksheets.Count}** worksheets in the workbook:\n");
                 }
 
                 var active = "";
@@ -70,10 +74,14 @@ namespace ExcelBot.Workers
                 }
 
                 // Check if the new worksheet exist
-                var worksheets = await ServicesHelper.ExcelService.ListWorksheetsAsync(
-                                                    workbookId,
-                                                    ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var worksheetsRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Worksheets.Request(headers);
+
+                var worksheets = await worksheetsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, worksheetsRequest);
 
                 var lowerWorksheetName = worksheetName.ToLower();
                 var worksheet = worksheets.FirstOrDefault(w => w.Name.ToLower() == lowerWorksheetName);
@@ -111,12 +119,16 @@ namespace ExcelBot.Workers
         {
             try
             {
-                var worksheets = await ServicesHelper.ExcelService.ListWorksheetsAsync(
-                                        workbookId,
-                                        ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
 
-                return worksheets.Select<Worksheet, string>(w => w.Name).ToArray();
+                var worksheetsRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Worksheets.Request(headers);
+
+                var worksheets = await worksheetsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, worksheetsRequest);
+
+                return worksheets.Select<WorkbookWorksheet, string>(w => w.Name).ToArray();
             }
             catch (Exception)
             {
