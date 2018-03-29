@@ -6,7 +6,9 @@
 using ExcelBot.Helpers;
 using ExcelBot.Model;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.ExcelServices;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Text;
@@ -23,22 +25,26 @@ namespace ExcelBot.Workers
 
             try
             {
-                var namedItems = await ServicesHelper.ExcelService.ListNamedItemsAsync(
-                                                workbookId,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
 
-                if (namedItems.Length > 0)
+                var namedItemsRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Names.Request(headers);
+
+                var namedItems = await namedItemsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, namedItemsRequest);
+
+                if (namedItems.Count > 0)
                 {
                     var reply = new StringBuilder();
 
-                    if (namedItems.Length == 1)
+                    if (namedItems.Count == 1)
                     {
                         reply.Append($"There is **1** named item in the workbook:\n");
                     }
                     else
                     {
-                        reply.Append($"There are **{namedItems.Length}** named items in the workbook:\n");
+                        reply.Append($"There are **{namedItems.Count}** named items in the workbook:\n");
                     }
 
                     foreach (var namedItem in namedItems)
@@ -150,20 +156,25 @@ namespace ExcelBot.Workers
 
         #region Helpers
         // Lookup a name assuming that it is named item, return null if it doesn't exist
-        public static async Task<NamedItem> GetNamedItem(IDialogContext context, string workbookId, string name)
+        public static async Task<Microsoft.Graph.WorkbookNamedItem> GetNamedItem(IDialogContext context, string workbookId, string name)
         {
-            NamedItem[] namedItems = null;
             try
             {
-                namedItems = await ServicesHelper.ExcelService.ListNamedItemsAsync(
-                                            workbookId,
-                                            ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var namedItemsRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Names.Request(headers);
+
+                var namedItems = await namedItemsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, namedItemsRequest);
+
+                return namedItems?.FirstOrDefault(n => n.Name.ToLower() == name.ToLower());
             }
             catch
             {
+                return null;
             }
-            return namedItems?.FirstOrDefault(n => n.Name.ToLower() == name.ToLower());
         }
 
         public static async Task SetNamedItemValue(IDialogContext context, string workbookId, string name, object value)
@@ -176,21 +187,31 @@ namespace ExcelBot.Workers
                     switch (namedItem.Type)
                     {
                         case "Range":
-                            var range = await ServicesHelper.ExcelService.NamedItemRangeAsync(
-                                        workbookId, namedItem.Name,
-                                        ExcelHelper.GetSessionIdForRead(context));
-                            await ServicesHelper.LogExcelServiceResponse(context);
+                            var headers = ServicesHelper.GetWorkbookSessionHeader(
+                                await ExcelHelper.GetSessionIdForUpdateAsync(context));
+
+                            var namedItemRangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                                    .Workbook.Names[namedItem.Name].Range().Request(headers);
+
+                            var range = await namedItemRangeRequest.GetAsync();
+                            await ServicesHelper.LogGraphServiceRequest(context, namedItemRangeRequest);
 
                             if ((range.RowCount == 1) && (range.ColumnCount == 1))
                             {
                                 // Named item points to a single cell
                                 try
                                 {
-                                    range = await ServicesHelper.ExcelService.UpdateRangeAsync(
-                                        workbookId, ExcelHelper.GetWorksheetName(range.Address), ExcelHelper.GetCellAddress(range.Address),
-                                        new object[] { new object[] { value } },
-                                        await ExcelHelper.GetSessionIdForUpdateAsync(context));
-                                    await ServicesHelper.LogExcelServiceResponse(context);
+                                    var newValue = new WorkbookRange()
+                                    {
+                                        Values = JToken.Parse($"[[\"{value}\"]]")
+                                    };
+
+                                    var updateRangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                                    .Workbook.Worksheets[ExcelHelper.GetWorksheetName(range.Address)]
+                                    .Cell(range.RowIndex.Value, range.ColumnIndex.Value).Request(headers);
+
+                                    range = await updateRangeRequest.PatchAsync(newValue);
+                                    await ServicesHelper.LogGraphServiceRequest(context, updateRangeRequest, newValue);
 
                                     await context.PostAsync($"**{namedItem.Name}** is now **{range.Text[0][0]}**");
                                 }
@@ -226,17 +247,21 @@ namespace ExcelBot.Workers
             }
         }
 
-        public static async Task ReplyWithValue(IDialogContext context, string workbookId, NamedItem namedItem)
+        public static async Task ReplyWithValue(IDialogContext context, string workbookId, WorkbookNamedItem namedItem)
         {
             try
             {
                 switch (namedItem.Type)
                 {
                     case "Range":
-                        var range = await ServicesHelper.ExcelService.NamedItemRangeAsync(
-                                    workbookId, namedItem.Name,
-                                    ExcelHelper.GetSessionIdForRead(context));
-                        await ServicesHelper.LogExcelServiceResponse(context);
+                        var headers = ServicesHelper.GetWorkbookSessionHeader(
+                                ExcelHelper.GetSessionIdForRead(context));
+
+                        var namedItemRangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                                .Workbook.Names[namedItem.Name].Range().Request(headers);
+
+                        var range = await namedItemRangeRequest.GetAsync();
+                        await ServicesHelper.LogGraphServiceRequest(context, namedItemRangeRequest);
 
                         if ((range.RowCount == 1) && (range.ColumnCount == 1))
                         {
@@ -274,22 +299,60 @@ namespace ExcelBot.Workers
             }
         }
 
-        public static string GetRangeReply(Range range)
+        public static string GetRangeReply(WorkbookRange range)
         {
             var newLine = "";
             var valuesString = new StringBuilder();
 
-            foreach (var row in (object[])range.Text)
+            var rows = JsonConvert.DeserializeObject<object[][]>(range.Text.ToString());
+
+            foreach (var row in rows)
             {
                 valuesString.Append(newLine);
                 newLine = "\n";
 
                 var separator = "";
                 valuesString.Append("* ");
-                foreach (var column in (object[])row)
+                foreach (var column in row)
                 {
                     valuesString.Append($"{separator}{column.ToString()}");
                     separator = ", ";
+                }
+            }
+            return valuesString.ToString();
+        }
+
+        public static string GetRangeReplyAsTable(WorkbookRange range)
+        {
+            var newLine = "";
+            var tableHeader = "\n";
+            var valuesString = new StringBuilder();
+
+            var rows = JsonConvert.DeserializeObject<object[][]>(range.Text.ToString());
+
+            bool addTableHeader = true;
+            foreach (var row in rows)
+            {
+                valuesString.Append(newLine);
+                newLine = "\n";
+
+                var separator = "";
+                valuesString.Append("| ");
+                foreach (var column in row)
+                {
+                    valuesString.Append($"{separator}{column.ToString()}");
+                    separator = " | ";
+                    if (addTableHeader)
+                    {
+                        tableHeader += "|---";
+                    }
+                }
+                valuesString.Append(" |");
+                if (addTableHeader)
+                {
+                    tableHeader += "|";
+                    valuesString.Append(tableHeader);
+                    addTableHeader = false;
                 }
             }
             return valuesString.ToString();

@@ -24,8 +24,9 @@ namespace ExcelBot.Workers
                 }
 
                 // Get meta data for the workbook
-                var item = await ServicesHelper.OneDriveService.GetItemMetadataAsync("", filename);
-                await ServicesHelper.LogOneDriveServiceResponse(context);
+                var itemRequest = ServicesHelper.GraphClient.Me.Drive.Root.ItemWithPath(filename).Request();
+                var item = await itemRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, itemRequest);
 
                 context.UserData.SetValue("WorkbookId", item.Id);
                 context.ConversationData.SetValue("WorkbookName", item.Name);
@@ -37,12 +38,15 @@ namespace ExcelBot.Workers
                 context.UserData.RemoveValue("TableName");
                 context.UserData.RemoveValue("RowIndex");
 
-                // Get the first worksheet in the workbook 
-                var worksheets = await ServicesHelper.ExcelService.ListWorksheetsAsync(
-                    item.Id,
-                    ExcelHelper.GetSessionIdForRead(context),
-                    "$top=1");
-                await ServicesHelper.LogExcelServiceResponse(context);
+                // Get the first worksheet in the workbook
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var worksheetsRequest = ServicesHelper.GraphClient.Me.Drive.Items[item.Id]
+                    .Workbook.Worksheets.Request(headers).Top(1);
+
+                var worksheets = await worksheetsRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, worksheetsRequest);
 
                 context.UserData.SetValue("WorksheetId", worksheets[0].Name);
 
