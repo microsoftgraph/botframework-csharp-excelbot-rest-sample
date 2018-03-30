@@ -3,18 +3,13 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Threading.Tasks;
-
+using ExcelBot.Helpers;
+using ExcelBot.Model;
+using ExcelBot.Workers;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis.Models;
-
-using ExcelBot.Helpers;
-using ExcelBot.Workers;
-using ExcelBot.Model;
+using System;
+using System.Threading.Tasks;
 
 namespace ExcelBot.Dialogs
 {
@@ -122,7 +117,7 @@ namespace ExcelBot.Dialogs
             string workbookId = String.Empty;
             context.UserData.TryGetValue<string>("WorkbookId", out workbookId);
 
-            if (!(String.IsNullOrEmpty(name)))
+            if (!(String.IsNullOrEmpty(workbookId)))
             {
                 string worksheetId = String.Empty;
                 context.UserData.TryGetValue<string>("WorksheetId", out worksheetId);

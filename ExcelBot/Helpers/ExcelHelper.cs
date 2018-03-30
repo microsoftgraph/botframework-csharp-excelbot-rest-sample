@@ -3,15 +3,10 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
-
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using System;
+using System.Threading.Tasks;
 
 namespace ExcelBot.Helpers
 {
@@ -76,8 +71,11 @@ namespace ExcelBot.Helpers
         private static async Task<string> CreateSession(IDialogContext context)
         {
             var workbookId = context.UserData.GetValue<string>("WorkbookId");
-            var sessionId = (await ServicesHelper.ExcelService.CreateSessionAsync(workbookId)).Id;
-            await ServicesHelper.LogExcelServiceResponse(context);
+            var createSessionRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                .Workbook.CreateSession(true).Request();
+
+            var sessionId = (await createSessionRequest.PostAsync()).Id;
+            await ServicesHelper.LogGraphServiceRequest(context, createSessionRequest);
 
             context.ConversationData.SetValue<string>("SessionId", sessionId);
             context.ConversationData.SetValue<string>("SessionWorkbookId", workbookId);

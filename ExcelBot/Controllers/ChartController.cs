@@ -3,21 +3,16 @@
  * See LICENSE in the project root for license information.
  */
 
+using ExcelBot.Helpers;
+using ExcelBot.Model;
+using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Web;
-using System.Web.Http;
-using System.Threading.Tasks;
-using System.IO;
 using System.Net.Http.Headers;
-
-using ExcelBot.Helpers;
-using Microsoft.Bot.Connector;
-using ExcelBot.Model;
+using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace ExcelBot
 {
@@ -29,17 +24,11 @@ namespace ExcelBot
             // Save the request url
             RequestHelper.RequestUri = Request.RequestUri;
 
-            // Get access token
-            var stateClient = (channelId == "emulator") ? 
-                                new StateClient(new Uri("http://localhost:21706"), new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword)) :
-                                new StateClient(new MicrosoftAppCredentials(Constants.microsoftAppId, Constants.microsoftAppPassword));
-
-            // Get value of user nonce
             ChartAttachment chartAttachment = null;
 
             try
             {
-                var conversationData = stateClient.BotState.GetConversationData(channelId, conversationId);
+                var conversationData = await BotStateHelper.GetConversationDataAsync(channelId, conversationId);
                 chartAttachment = conversationData.GetProperty<ChartAttachment>(userNonce);
 
                 if (chartAttachment == null)
@@ -47,11 +36,12 @@ namespace ExcelBot
                     throw new ArgumentException("User nounce not found");
                 }
 
-                AuthBot.Models.AuthResult authResult = null;
+                // Get access token
+                BotAuth.Models.AuthResult authResult = null;
                 try
                 {
-                    var userData = stateClient.BotState.GetUserData(channelId, userId);
-                    authResult = userData.GetProperty<AuthBot.Models.AuthResult>(AuthBot.ContextConstants.AuthResultKey);
+                    var userData = await BotStateHelper.GetUserDataAsync(channelId, userId);
+                    authResult = userData.GetProperty<BotAuth.Models.AuthResult>($"MSALAuthProvider{BotAuth.ContextConstants.AuthResultKey}");
                 }
                 catch
                 {
@@ -61,8 +51,49 @@ namespace ExcelBot
                 {
                     ServicesHelper.AccessToken = authResult.AccessToken;
 
+                    var headers = ServicesHelper.GetWorkbookSessionHeader(
+                        ExcelHelper.GetSessionIdForRead(conversationData, chartAttachment.WorkbookId));
+
                     // Get the chart image
-                    var imageAsString = await ServicesHelper.ExcelService.GetChartImageAsync(chartAttachment.WorkbookId, chartAttachment.WorksheetId, chartAttachment.ChartId, ExcelHelper.GetSessionIdForRead(conversationData, chartAttachment.WorkbookId));
+                    #region Graph client bug workaround
+                    // Workaround for following issue:
+                    // https://github.com/microsoftgraph/msgraph-sdk-dotnet/issues/107
+
+                    // Proper call should be:
+                    // var imageAsString = await ServicesHelper.GraphClient.Me.Drive.Items[chartAttachment.WorkbookId]
+                    //     .Workbook.Worksheets[chartAttachment.WorksheetId]
+                    //     .Charts[chartAttachment.ChartId].Image(0, 0, "fit").Request(headers).GetAsync();
+
+                    // Get the request URL just to the chart because the image
+                    // request builder is broken
+                    string chartRequestUrl = ServicesHelper.GraphClient.Me.Drive.Items[chartAttachment.WorkbookId]
+                        .Workbook.Worksheets[chartAttachment.WorksheetId]
+                        .Charts[chartAttachment.ChartId].Request().RequestUrl;
+
+                    // Append the proper image request segment
+                    string chartImageRequestUrl = $"{chartRequestUrl}/image(width=0,height=0,fittingMode='fit')";
+
+                    // Create an HTTP request message
+                    var imageRequest = new HttpRequestMessage(HttpMethod.Get, chartImageRequestUrl);
+
+                    // Add session header
+                    imageRequest.Headers.Add(headers[0].Name, headers[0].Value);
+
+                    // Add auth
+                    await ServicesHelper.GraphClient.AuthenticationProvider.AuthenticateRequestAsync(imageRequest);
+
+                    // Send request
+                    var imageResponse = await ServicesHelper.GraphClient.HttpProvider.SendAsync(imageRequest);
+
+                    if (!imageResponse.IsSuccessStatusCode)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.NotFound);
+                    }
+
+                    // Parse the response for the base 64 image string
+                    var imageObject = JObject.Parse(await imageResponse.Content.ReadAsStringAsync());
+                    var imageAsString = imageObject.GetValue("value").ToString();
+                    #endregion
 
                     // Convert the image from a string to an image
                     byte[] byteBuffer = Convert.FromBase64String(imageAsString);

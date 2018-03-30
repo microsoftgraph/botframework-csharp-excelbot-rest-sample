@@ -3,13 +3,15 @@
  * See LICENSE in the project root for license information.
  */
 
+using Autofac;
+using Microsoft.Bot.Builder.Azure;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Internals;
+using Microsoft.Bot.Connector;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Web;
+using System.Reflection;
 using System.Web.Http;
-using System.Web.Routing;
 
 namespace ExcelBot
 {
@@ -17,14 +19,26 @@ namespace ExcelBot
     {
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+            // Need to register a bot state data store
+            Conversation.UpdateContainer(
+                builder =>
+                {
+                    builder.RegisterModule(new AzureModule(Assembly.GetExecutingAssembly()));
 
-            AuthBot.Models.AuthSettings.Mode = ConfigurationManager.AppSettings["ActiveDirectory.Mode"];
-            AuthBot.Models.AuthSettings.EndpointUrl = ConfigurationManager.AppSettings["ActiveDirectory.EndpointUrl"];
-            AuthBot.Models.AuthSettings.Tenant = ConfigurationManager.AppSettings["ActiveDirectory.Tenant"];
-            AuthBot.Models.AuthSettings.RedirectUrl = ConfigurationManager.AppSettings["ActiveDirectory.RedirectUrl"];
-            AuthBot.Models.AuthSettings.ClientId = ConfigurationManager.AppSettings["ActiveDirectory.ClientId"];
-            AuthBot.Models.AuthSettings.ClientSecret = ConfigurationManager.AppSettings["ActiveDirectory.ClientSecret"];
+                    // This will create a CosmosDB store, suitable for production
+                    // NOTE: Requires an actual CosmosDB instance and configuration in
+                    // PrivateSettings.config
+                    var databaseUri = new Uri(ConfigurationManager.AppSettings["Database.Uri"]);
+                    var databaseKey = ConfigurationManager.AppSettings["Database.Key"];
+                    var store = new DocumentDbBotDataStore(databaseUri, databaseKey);
+
+                    builder.Register(c => store)
+                        .Keyed<IBotDataStore<BotData>>(AzureModule.Key_DataStore)
+                        .AsSelf()
+                        .SingleInstance();
+                });
+
+            GlobalConfiguration.Configure(WebApiConfig.Register);
         }
     }
 }

@@ -3,29 +3,18 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Graph;
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using System.Web.Http;
-
-using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
-
-using Office365Service;
-using Office365Service.ViewModel;
 
 namespace ExcelBot.Helpers
 {
     public static class ServicesHelper
     {
-        // Excel Service Settings
-        public const string Resource = "https://graph.microsoft.com";
-
-        private const string UserApiVersion = "v1.0";
-        private const string OneDriveApiVersion = "v1.0";
-        private const string ExcelApiVersion = "v1.0";
+        private static bool doLogging = false;
 
         #region Properties
         public static string AccessToken
@@ -40,132 +29,56 @@ namespace ExcelBot.Helpers
             }
         }
 
-        public static Office365Service.User.UserService UserService
+        public static GraphServiceClient GraphClient
         {
             get
             {
-                if (!(HttpContext.Current.Items.Contains("UserService")))
+                if (!(HttpContext.Current.Items.Contains("GraphClient")))
                 {
-                    var service = new Office365Service.User.UserService(
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-                        async () =>
-                        {
-                            return AccessToken;
-                        }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-                        )
-                    {
-                        Url = $"{Resource}/{UserApiVersion}"
-                    };
-                    HttpContext.Current.Items["UserService"] = service;
+                    var client = new GraphServiceClient(
+                        new DelegateAuthenticationProvider(
+#pragma warning disable CS1998
+                            async (requestMessage) =>
+                            {
+                                requestMessage.Headers.Authorization =
+                                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+                            }));
+#pragma warning restore CS1998
+
+                    HttpContext.Current.Items["GraphClient"] = client;
                 }
-                return (Office365Service.User.UserService)(HttpContext.Current.Items["UserService"]);
+
+                return (GraphServiceClient)HttpContext.Current.Items["GraphClient"];
             }
         }
 
-        public static Office365Service.OneDrive.OneDriveService OneDriveService
+        public static List<HeaderOption> GetWorkbookSessionHeader(string sessionId)
         {
-            get
+            return new List<HeaderOption>()
             {
-                if (!(HttpContext.Current.Items.Contains("OneDriveService")))
-                {
-                    var service = new Office365Service.OneDrive.OneDriveService(
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-                        async () =>
-                        {
-                            return AccessToken;
-                        }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-                        )
-                    {
-                        Url = $"{Resource}/{OneDriveApiVersion}"
-                    };
-                    HttpContext.Current.Items["OneDriveService"] = service;
-                }
-                return (Office365Service.OneDrive.OneDriveService)(HttpContext.Current.Items["OneDriveService"]);
-            }
-        }
-
-        public static Office365Service.Excel.ExcelRESTService ExcelService
-        {
-            get
-            {
-                if (!(HttpContext.Current.Items.Contains("ExcelService")))
-                {
-                    var service = new Office365Service.Excel.ExcelRESTService(
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-                        async () =>
-                        {
-                            return AccessToken;
-                        }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-                        )
-                    {
-                        Url = $"{Resource}/{ExcelApiVersion}"
-                    };
-                    HttpContext.Current.Items["ExcelService"] = service;
-                }
-                return (Office365Service.Excel.ExcelRESTService)(HttpContext.Current.Items["ExcelService"]);
-            }
+                new HeaderOption("workbook-session-id", sessionId)
+            };
         }
         #endregion
 
         #region Methods
-        public static void StartLogging(Activity activity)
+        public static void StartLogging(bool verbose)
         {
-            var stateClient = activity.GetStateClient();
-            var conversationData = stateClient.BotState.GetConversationData(activity.ChannelId, activity.Conversation.Id);
-            var verbose = conversationData.GetProperty<bool>("Verbose");
-            if (verbose)
+            doLogging = verbose;
+        }
+
+        public static async Task LogGraphServiceRequest(IDialogContext context, IBaseRequest request, object payload = null)
+        {
+            if (doLogging)
             {
-                UserService.RequestViewModel = new RequestViewModel();
-                UserService.ResponseViewModel = new ResponseViewModel();
-
-                OneDriveService.RequestViewModel = new RequestViewModel();
-                OneDriveService.ResponseViewModel = new ResponseViewModel();
-
-                ExcelService.RequestViewModel = new RequestViewModel();
-                ExcelService.ResponseViewModel = new ResponseViewModel();
-            }
-            else
-            {
-                UserService.RequestViewModel = null;
-                UserService.ResponseViewModel = null;
-
-                OneDriveService.RequestViewModel = null;
-                OneDriveService.ResponseViewModel = null;
-
-                ExcelService.RequestViewModel = null;
-                ExcelService.ResponseViewModel = null;
-            }
-        }
-
-        public static async Task LogUserServiceResponse(IDialogContext context)
-        {
-            await LogResponse(context, UserService);
-        }
-
-        public static async Task LogOneDriveServiceResponse(IDialogContext context)
-        {
-            await LogResponse(context, OneDriveService);
-        }
-        public static async Task LogExcelServiceResponse(IDialogContext context)
-        {
-            await LogResponse(context, ExcelService);
-        }
-
-        public static async Task LogResponse(IDialogContext context, RESTService service)
-        {
-            if (service.ResponseViewModel != null)
-            {
-                var request = service.RequestViewModel;
-                if ((request.Api.Method == "POST") || (request.Api.Method == "PATCH"))
+                if (request.Method == "POST" || request.Method == "PATCH")
                 {
-                    await context.PostAsync($"{request.Model.Api.Method} {request.Model.Api.RequestUri}\n\n{request.Body}");
+                    string prettyPayload = JsonConvert.SerializeObject(payload, Formatting.Indented);
+                    await context.PostAsync($"```\n{request.Method} {request.RequestUrl}\n\n{prettyPayload}\n```");
                 }
                 else
                 {
-                    await context.PostAsync($"{request.Model.Api.Method} {request.Model.Api.RequestUri}");
+                    await context.PostAsync($"`{request.Method} {request.RequestUrl}`");
                 }
             }
         }

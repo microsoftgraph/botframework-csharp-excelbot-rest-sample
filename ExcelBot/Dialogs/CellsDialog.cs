@@ -3,18 +3,13 @@
  * See LICENSE in the project root for license information.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Threading.Tasks;
-
+using ExcelBot.Helpers;
+using ExcelBot.Model;
+using ExcelBot.Workers;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis.Models;
-
-using ExcelBot.Helpers;
-using ExcelBot.Workers;
-using ExcelBot.Model;
+using System;
+using System.Threading.Tasks;
 
 namespace ExcelBot.Dialogs
 {
@@ -187,8 +182,11 @@ namespace ExcelBot.Dialogs
             ObjectType? type = null;
             context.UserData.TryGetValue<ObjectType?>("Type", out type);
 
-            var name = string.Empty;
-            context.UserData.TryGetValue<string>("Name", out name);
+            var name = LuisHelper.GetNameEntity(result.Entities);
+            if (!string.IsNullOrEmpty(name))
+            {
+                context.UserData.SetValue<string>("Name", name);
+            }
 
             Value = LuisHelper.GetValue(result);
 

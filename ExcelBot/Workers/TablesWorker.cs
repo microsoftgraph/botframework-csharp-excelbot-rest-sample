@@ -3,18 +3,16 @@
  * See LICENSE in the project root for license information.
  */
 
+using ExcelBot.Helpers;
+using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Graph;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
-
-using Microsoft.Bot.Builder.Dialogs;
-
-using Microsoft.ExcelServices;
-
-using ExcelBot.Helpers;
 
 namespace ExcelBot.Workers
 {
@@ -27,22 +25,26 @@ namespace ExcelBot.Workers
 
             try
             {
-                var tables = await ServicesHelper.ExcelService.ListTablesAsync(
-                                                workbookId,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
 
-                if (tables.Length > 0)
+                var tablesRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Tables.Request(headers);
+
+                var tables = await tablesRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, tablesRequest);
+
+                if (tables.Count > 0)
                 {
                     var reply = new StringBuilder();
 
-                    if (tables.Length == 1)
+                    if (tables.Count == 1)
                     {
                         reply.Append($"There is **1** table in the workbook:\n");
                     }
                     else
                     {
-                        reply.Append($"There are **{tables.Length}** tables in the workbook:\n");
+                        reply.Append($"There are **{tables.Count}** tables in the workbook:\n");
                     }
 
                     foreach (var table in tables)
@@ -75,14 +77,18 @@ namespace ExcelBot.Workers
             {
                 if ((tableName != null) && (tableName != string.Empty))
                 {
-                    Table table = null;
+                    WorkbookTable table = null;
+
+                    var headers = ServicesHelper.GetWorkbookSessionHeader(
+                        ExcelHelper.GetSessionIdForRead(context));
 
                     try
                     {
-                        table = await ServicesHelper.ExcelService.GetTableAsync(
-                                        workbookId, tableName,
-                                        ExcelHelper.GetSessionIdForRead(context));
-                        await ServicesHelper.LogExcelServiceResponse(context);
+                        var tablesRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                            .Workbook.Tables[tableName].Request(headers);
+
+                        table = await tablesRequest.GetAsync();
+                        await ServicesHelper.LogGraphServiceRequest(context, tablesRequest);
                     }
                     catch
                     {
@@ -92,10 +98,11 @@ namespace ExcelBot.Workers
                     {
                         if ((value != null) && (value != string.Empty))
                         {
-                            var range = await ServicesHelper.ExcelService.GetTableDataBodyRangeAsync(
-                                            workbookId, tableName,
-                                            ExcelHelper.GetSessionIdForRead(context));
+                            var rangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                            .Workbook.Tables[tableName].DataBodyRange().Request(headers);
 
+                            var range = await rangeRequest.GetAsync();
+                            await ServicesHelper.LogGraphServiceRequest(context, rangeRequest);
 
                             if ((range != null) && (range.RowCount > 0))
                             {
@@ -171,14 +178,18 @@ namespace ExcelBot.Workers
             {
                 if ((tableName != null) && (tableName != string.Empty))
                 {
-                    Table table = null;
+                    WorkbookTable table = null;
+
+                    var headers = ServicesHelper.GetWorkbookSessionHeader(
+                        await ExcelHelper.GetSessionIdForUpdateAsync(context));
 
                     try
                     {
-                        table = await ServicesHelper.ExcelService.GetTableAsync(
-                                        workbookId, tableName,
-                                        ExcelHelper.GetSessionIdForRead(context));
-                        await ServicesHelper.LogExcelServiceResponse(context);
+                        var tablesRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                            .Workbook.Tables[tableName].Request(headers);
+
+                        table = await tablesRequest.GetAsync();
+                        await ServicesHelper.LogGraphServiceRequest(context, tablesRequest);
                     }
                     catch
                     {
@@ -187,10 +198,11 @@ namespace ExcelBot.Workers
                     if (table != null)
                     {
                         // Get number of columns in table
-                        var tableHeaderRange = await ServicesHelper.ExcelService.GetTableHeaderRowRangeAsync(
-                                                    workbookId, tableName,
-                                                    ExcelHelper.GetSessionIdForRead(context));
-                        await ServicesHelper.LogExcelServiceResponse(context);
+                        var headerRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Tables[table.Id].HeaderRowRange().Request(headers);
+
+                        var tableHeaderRange = await headerRequest.GetAsync();
+                        await ServicesHelper.LogGraphServiceRequest(context, headerRequest);
 
                         // Ensure that the row to be added has the right number of values. Add additional values, if needed
                         var checkedRows = new List<object>(); 
@@ -211,15 +223,20 @@ namespace ExcelBot.Workers
                             }
                         }
                         // Add row
-                        var row = await ServicesHelper.ExcelService.AddTableRowAsync(workbookId, tableName, checkedRows.ToArray(), null, await ExcelHelper.GetSessionIdForUpdateAsync(context));
-                        await ServicesHelper.LogExcelServiceResponse(context);
+                        var newVals = JToken.Parse(JsonConvert.SerializeObject(checkedRows));
+                        var addRowRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Tables[table.Id].Rows.Add(values: newVals).Request(headers);
+
+                        var row = await addRowRequest.PostAsync();
+                        await ServicesHelper.LogGraphServiceRequest(context, addRowRequest, newVals);
 
                         await context.PostAsync($"Added a new row to **{table.Name}**");
 
-                        var range = await ServicesHelper.ExcelService.GetTableDataBodyRangeAsync(
-                            workbookId, tableName,
-                            ExcelHelper.GetSessionIdForRead(context));
-                        await ServicesHelper.LogExcelServiceResponse(context);
+                        var rangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                            .Workbook.Tables[table.Id].DataBodyRange().Request(headers);
+
+                        var range = await rangeRequest.GetAsync();
+                        await ServicesHelper.LogGraphServiceRequest(context, rangeRequest);
 
                         await ReplyWithTableRow(context, workbookId, table, range.Text[row.Index ?? 0]);
                     }
@@ -242,15 +259,19 @@ namespace ExcelBot.Workers
 
         #region Helpers
         // Lookup a name assuming that it is named item, return null if it doesn't exist
-        public static async Task<Table> GetTable(IDialogContext context, string workbookId, string name)
+        public static async Task<WorkbookTable> GetTable(IDialogContext context, string workbookId, string name)
         {
-            Table table = null;
+            WorkbookTable table = null;
             try
             {
-                table = await ServicesHelper.ExcelService.GetTableAsync(
-                                                workbookId, name,
-                                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
+
+                var tableRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Tables[name].Request(headers);
+
+                table = await tableRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, tableRequest);
             }
             catch
             {
@@ -260,40 +281,52 @@ namespace ExcelBot.Workers
 
         public static async Task SetColumnValue(IDialogContext context, string workbookId, string tableName, string name, int rowIndex, object value)
         {
+            var headers = ServicesHelper.GetWorkbookSessionHeader(
+                await ExcelHelper.GetSessionIdForUpdateAsync(context));
+
             // Get the table
-            var table = await ServicesHelper.ExcelService.GetTableAsync(
-                                workbookId, tableName,
-                                ExcelHelper.GetSessionIdForRead(context));
+            var tableRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                    .Workbook.Tables[tableName].Request(headers);
+
+            var table = await tableRequest.GetAsync();
+            await ServicesHelper.LogGraphServiceRequest(context, tableRequest);
 
             if ((bool)(table.ShowHeaders))
             {
                 // Get the table header
-                var header = await ServicesHelper.ExcelService.GetTableHeaderRowRangeAsync(
-                                workbookId, tableName,
-                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headerRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Tables[table.Id].HeaderRowRange().Request(headers);
+
+                var header = await headerRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, headerRequest);
 
                 // Find the column
                 var lowerName = name.ToLower();
                 var columnIndex = header.Text[0].IndexOf(h => h.ToString().ToLower() == lowerName);
                 if (columnIndex >= 0)
                 {
-                    var dataBodyRange = await ServicesHelper.ExcelService.GetTableDataBodyRangeAsync(workbookId, tableName, ExcelHelper.GetSessionIdForRead(context), "$select=columnIndex, rowIndex, rowCount, address");
-                    var rowAddress = ExcelHelper.GetRangeAddress(
-                            (int)(dataBodyRange.ColumnIndex) + columnIndex,
-                            (int)(dataBodyRange.RowIndex) + rowIndex,
-                            1,
-                            1
-                        );
+                    var rangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                            .Workbook.Tables[table.Id].DataBodyRange().Request(headers);
 
-                    var range = await ServicesHelper.ExcelService.UpdateRangeAsync(
-                            workbookId,
-                            ExcelHelper.GetWorksheetName(dataBodyRange.Address),
-                            rowAddress,
-                            new object[] { new object[] { value } },
-                            await ExcelHelper.GetSessionIdForUpdateAsync(context)
-                        );
-                    await ServicesHelper.LogExcelServiceResponse(context);
+                    var dataBodyRange = await rangeRequest.GetAsync();
+                    await ServicesHelper.LogGraphServiceRequest(context, rangeRequest);
+
+                    var rowAddress = ExcelHelper.GetRangeAddress(
+                        (int)(dataBodyRange.ColumnIndex) + columnIndex,
+                        (int)(dataBodyRange.RowIndex) + rowIndex,
+                        1, 1);
+
+                    var newValue = new WorkbookRange()
+                    {
+                        Values = JToken.Parse($"[[\"{value}\"]]")
+                    };
+
+                    var updateRangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Worksheets[ExcelHelper.GetWorksheetName(dataBodyRange.Address)]
+                        .Range(rowAddress).Request(headers);
+
+                    var range = await updateRangeRequest.PatchAsync(newValue);
+                    await ServicesHelper.LogGraphServiceRequest(context, updateRangeRequest, newValue);
 
                     await context.PostAsync($"**{header.Text[0][columnIndex]}** is now **{range.Text[0][0]}**");
                 }
@@ -309,16 +342,20 @@ namespace ExcelBot.Workers
         }
 
 
-        public static async Task ReplyWithTable(IDialogContext context, string workbookId, Table table)
+        public static async Task ReplyWithTable(IDialogContext context, string workbookId, WorkbookTable table)
         {
             try
             {
-                var range = await ServicesHelper.ExcelService.GetTableRangeAsync(
-                                workbookId, table.Id,
-                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
 
-                var reply = $"**{table.Name}**\n\n{NamedItemsWorker.GetRangeReply(range)}";
+                var rangeRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Tables[table.Id].Range().Request(headers);
+
+                var range = await rangeRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, rangeRequest);
+
+                var reply = $"**{table.Name}**\n\n{NamedItemsWorker.GetRangeReplyAsTable(range)}";
                 await context.PostAsync(reply);
             }
             catch (Exception ex)
@@ -327,24 +364,30 @@ namespace ExcelBot.Workers
             }
         }
 
-        public static async Task ReplyWithTableRow(IDialogContext context, string workbookId, Table table, object[] row)
+        public static async Task ReplyWithTableRow(IDialogContext context, string workbookId, WorkbookTable table, JToken row)
         {
+            // Convert JToken
+            var rowVals = JsonConvert.DeserializeObject<object[]>(row.ToString());
+
             if ((bool)(table.ShowHeaders))
             {
                 // Get the table header
-                var header = await ServicesHelper.ExcelService.GetTableHeaderRowRangeAsync(
-                                workbookId, table.Id,
-                                ExcelHelper.GetSessionIdForRead(context));
-                await ServicesHelper.LogExcelServiceResponse(context);
+                var headers = ServicesHelper.GetWorkbookSessionHeader(
+                    ExcelHelper.GetSessionIdForRead(context));
 
+                var headerRequest = ServicesHelper.GraphClient.Me.Drive.Items[workbookId]
+                        .Workbook.Tables[table.Id].HeaderRowRange().Request(headers);
+
+                var header = await headerRequest.GetAsync();
+                await ServicesHelper.LogGraphServiceRequest(context, headerRequest);
 
                 var reply = new StringBuilder();
                 var separator = "";
-                for (var i = 0; i < row.Length; i++)
+                for (var i = 0; i < rowVals.Length; i++)
                 {
-                    if ((row[i] != null) && (((string)row[i]) != string.Empty))
+                    if ((rowVals[i] != null) && (((string)rowVals[i]) != string.Empty))
                     {
-                        reply.Append($"{separator}* {header.Text[0][i]}: **{row[i]}**");
+                        reply.Append($"{separator}* {header.Text[0][i]}: **{rowVals[i]}**");
                         separator = "\n";
                     }
                 }
@@ -354,9 +397,9 @@ namespace ExcelBot.Workers
             {
                 var reply = new StringBuilder();
                 var separator = "";
-                for (var i = 0; i < row.Length; i++)
+                for (var i = 0; i < rowVals.Length; i++)
                 {
-                    reply.Append($"{separator}* **{row[i]}**");
+                    reply.Append($"{separator}* **{rowVals[i]}**");
                     separator = "\n";
                 }
                 await context.PostAsync(reply.ToString());

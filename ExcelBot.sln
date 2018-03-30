@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2011
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelBot", "ExcelBot\ExcelBot.csproj", "{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelRESTService.Portable", "..\uwp-csharp-excel-snippets-rest-sample\src\ExcelRESTService.Portable\ExcelRESTService.Portable.csproj", "{0BDA3891-AFD6-42F7-9005-3A1DF72766EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,12 +15,11 @@ Global
 		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8BA1066-5695-4D71-ABB4-65E5A5E0C3D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0BDA3891-AFD6-42F7-9005-3A1DF72766EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BDA3891-AFD6-42F7-9005-3A1DF72766EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BDA3891-AFD6-42F7-9005-3A1DF72766EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BDA3891-AFD6-42F7-9005-3A1DF72766EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A77CB6A6-C57C-45F1-BBE6-435D1532D80F}
 	EndGlobalSection
 EndGlobal
