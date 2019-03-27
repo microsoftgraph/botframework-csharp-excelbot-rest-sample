@@ -9,7 +9,7 @@ Excel Bot is a sample that demonstrates how to use the [Microsoft Graph](https:/
 
 This sample requires the following:  
 
-- Visual Studio 2015 with Update 3
+- Visual Studio 2017.
 - An Office 365 for business account. You can sign up for an [Office 365 Developer subscription](https://msdn.microsoft.com/en-us/office/office365/howto/setup-development-environment) that includes the resources that you need to start building Office 365 apps.
 
 ## Getting started ##
@@ -42,16 +42,37 @@ Complete the these steps to setup your development environment to build and test
 
 ### Register bot to call Graph
 
-Head over to the [Application Registration Portal](https://apps.dev.microsoft.com/) to quickly get an application ID and secret. 
+1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com). Login using a **Work or School Account**.
 
-1. Using the **Sign in** link, sign in with either your Microsoft account (Outlook.com), or your work or school account (Office 365).
-1. Click the **Add an app** button. Enter a name and click **Create application**. 
-1. Locate the **Application Secrets** section, and click the **Generate New Password** button. Copy the password now and save it to a safe place. Once you've copied the password, click **Ok**.
-1. Locate the **Platforms** section, and click **Add Platform**. Choose **Web**, then enter `http://<BOT_HOST_NAME>/callback`, replacing `<BOT_HOST_NAME>` with the hostname for your bot under **Redirect URIs**.
+1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations (Preview)** under **Manage**.
+
+    ![A screenshot of the App registrations ](readme-images/aad-portal-app-registrations.png)
+
+1. Select **New registration**. On the **Register an application** page, set the values as follows.
+
+    - Set a preferred **Name** e.g. `Excel Bot App`.
+    - Set **Supported account types** to **Accounts in any organizational directory**.
+    - Under **Redirect URI**, set the first drop-down to `Web` and set the value to http://localhost:3978/callback.
+
+    ![A screenshot of the Register an application page](readme-images/aad-register-an-app.png)
 
     > **Note:** If you are running this locally and on Azure, you should add two redirect URLs here, one to your local instance and one to your Azure web app.
+    
+1. Choose **Register**. On the **Excel Bot App** page, copy the value of the **Application (client) ID** and save it, you will need it to configure the app.
 
-1. Click **Save** to complete the registration. Copy the **Application Id** and save it along with the password you copied earlier. We'll need those values soon.
+    ![A screenshot of the application ID of the new app registration](readme-images/aad-application-id.PNG)
+
+1. Select **Certificates & secrets** under **Manage**. Select the **New client secret** button. Enter a value in **Description** and select one of the options for **Expires** and choose **Add**.
+
+    ![A screenshot of the Add a client secret dialog](readme-images/aad-new-client-secret.png)
+
+1. Copy the client secret value before you leave this page. You will need it to configure the app.
+
+    > [!IMPORTANT]
+    > This client secret is never shown again, so make sure you copy it now.
+
+    ![A screenshot of the newly added client secret](readme-images/aad-copy-client-secret.png)
+
 
 ## Give us your feedback
 
@@ -63,5 +84,5 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Copyright
 
-Copyright (c) 2016 Microsoft. All rights reserved.
+Copyright (c) 2019 Microsoft. All rights reserved.
   
