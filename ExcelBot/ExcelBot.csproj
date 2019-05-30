@@ -274,7 +274,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Luis\ExcelBot.json" />
-    <Content Include="PrivateSettings.config.example" />
     <None Include="Properties\PublishProfiles\excelbot - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\excelbotv3-staging - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
@@ -283,6 +282,7 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
+    <Content Include="PrivateSettings.config" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
