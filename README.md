@@ -51,7 +51,7 @@ This sample requires the following:
     - Set **Supported account types** to **Accounts in any organizational directory**.
     - Under **Redirect URI**, set the first drop-down to `Web` and set the value to http://localhost:3978/callback.
 
-    ![A screenshot of the Register an application page](readme-images/aad-register-an-app.png)
+    ![A screenshot of the Register an application page](readme-images/aad-register-an-app.PNG)
 
     > **Note:** If you are running this locally and on Azure, you should add two redirect URLs here, one to your local instance and one to your Azure web app.
     
@@ -61,7 +61,7 @@ This sample requires the following:
 
 1. Select **Certificates & secrets** under **Manage**. Select the **New client secret** button. Enter a value in **Description** and select one of the options for **Expires** and choose **Add**.
 
-    ![A screenshot of the Add a client secret dialog](readme-images/aad-new-client-secret.PNG)
+    ![A screenshot of the Add a client secret dialog](readme-images/aad-new-client-secret.png)
 
 1. Copy the client secret value before you leave this page. You will need it to configure the app.
 
