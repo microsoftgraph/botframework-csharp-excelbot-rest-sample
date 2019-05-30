@@ -61,7 +61,7 @@ This sample requires the following:
 
 1. Select **Certificates & secrets** under **Manage**. Select the **New client secret** button. Enter a value in **Description** and select one of the options for **Expires** and choose **Add**.
 
-    ![A screenshot of the Add a client secret dialog](readme-images/aad-new-client-secret.png)
+    ![A screenshot of the Add a client secret dialog](readme-images/aad-new-client-secret.PNG)
 
 1. Copy the client secret value before you leave this page. You will need it to configure the app.
 
