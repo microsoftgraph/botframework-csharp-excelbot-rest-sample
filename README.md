@@ -1,50 +1,53 @@
 
 # Excel Bot
 
+## Table of Contents. ##
+
+[Introduction.](#introduction)
+
+[Prerequisites.](#prerequisites)
+
+[Cloning or downloading this repository.](#cloning-downloading-repo)
+
+[Register the application.](#register-the-application)
+
+[Configure your Azure AD tenant.](#configure-azure)
+
+[Register the bot.](#register-bot)
+
+Configure the sample to use your Azure AD tenant
+Build and run the sample
+Questions and comments
+Contributing
+Additional resources
+
+## Introduction.
+<a name="introduction"></a>
 Excel Bot is a sample that demonstrates how to use the [Microsoft Graph](https://graph.microsoft.io) and specifically the [Excel REST API](https://graph.microsoft.io/en-us/docs/api-reference/v1.0/resources/excel) to access Excel workbooks stored in OneDrive for Business through a conversational user interface. It is written in C# and it uses the [Microsoft Bot Framework](https://dev.botframework.com/) and the [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai/).
 
 *Note*: The code in this sample was originally written for a user experience prototype and does not necessarily demonstrate how to create production quality code.
 
-## Prerequisites ##
+## Prerequisites.
+<a name="prerequisites"></a>
 
 This sample requires the following:  
 
 - Visual Studio 2017.
 - An Office 365 for business account. You can sign up for an [Office 365 Developer subscription](https://msdn.microsoft.com/en-us/office/office365/howto/setup-development-environment) that includes the resources that you need to start building Office 365 apps.
 
-## Getting started ##
+## Cloning or downloading this repository.
+<a name="cloning-downloading-repo"></a>
 
-Complete the these steps to setup your development environment to build and test the Excel bot:
-
-- Download and install the [Azure Cosmos DB Emulator](https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator)
 - Clone this repo to a local folder
-- Rename the **./ExcelBot/PrivateSettings.config.example** file to **PrivateSettings.config**.
-- Open the ExcelBot.sln solution file
-- Register the bot in the [Bot Framework](https://dev.botframework.com/bots/new)
-- Copy the bot MicrosoftAppId and MicrosoftAppPassword to the PrivateSettings.config file
-- [Register the bot to call the Microsoft Graph](#register-bot-to-call-graph)
-- Copy the Azure Active Directory Client Id and Secret to the PrivateSettings.config file
-- Create a new model in the [LUIS](https://www.luis.ai) service
-- Import the LUIS\excelbot.json file into LUIS
-- Train and publish the LUIS model
-- Copy the LUIS model id and subscription key to the Dialogs\ExcelBotDialog.cs file
-- (Optional) Enable Web Chat for the bot in the Bot Framework and copy the Web Chat embed template the chat.htm file
-- (Optional) To get the bot to send telemetry to [Visual Studio Application Insights](https://azure.microsoft.com/en-us/services/application-insights/), copy the instrumentation key to the following files: ApplicationInsights.config, default.htm, loggedin.htm, chat.htm
-- Build the solution
-- Press F5 to start the bot locally
-- Test the bot locally with the [Bot Framework Emulator](https://docs.botframework.com/en-us/tools/bot-framework-emulator)
-- Create a web app in Azure
-- Create an Azure Cosmos DB in Azure that uses the SQL API
-- Replace the bots host name in the PrivateSettings.config file
-- Replace the database URI and key in the PrivateSettings.config file
-- Publish the solution to the Azure web app
-- Test the deployed bot using the Web Chat control by browsing to the chat.htm page  
 
-### Register bot to call Graph
+    ` git clone https://github.com/nicolesigei/botframework-csharp-excelbot-rest-sample.git `
+
+<a name="configure-azure"></a>
+## Configure your Azure AD tenant.
 
 1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com). Login using a **Work or School Account**.
 
-1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations (Preview)** under **Manage**.
+1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations** under **Manage**.
 
     ![A screenshot of the App registrations ](readme-images/aad-portal-app-registrations.png)
 
@@ -72,6 +75,38 @@ Complete the these steps to setup your development environment to build and test
     > This client secret is never shown again, so make sure you copy it now.
 
     ![A screenshot of the newly added client secret](readme-images/aad-copy-client-secret.png)
+    <a name = "register-bot"></a>
+## Register the bot.
+
+Complete the these steps to setup your development environment to build and test the Excel bot:
+
+- Download and install the [Azure Cosmos DB Emulator](https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator)
+
+- Rename the **./ExcelBot/PrivateSettings.config.example** file to **PrivateSettings.config**.
+- Open the ExcelBot.sln solution file
+- Register the bot in the [Bot Framework](https://dev.botframework.com/bots/new)
+- Copy the bot MicrosoftAppId and MicrosoftAppPassword to the PrivateSettings.config file
+- [Register the bot to call the Microsoft Graph](#register-bot-to-call-graph)
+- Copy the Azure Active Directory Client Id and Secret to the PrivateSettings.config file
+- Create a new model in the [LUIS](https://www.luis.ai) service
+- Import the LUIS\excelbot.json file into LUIS
+- Train and publish the LUIS model
+- Copy the LUIS model id and subscription key to the Dialogs\ExcelBotDialog.cs file
+- (Optional) Enable Web Chat for the bot in the Bot Framework and copy the Web Chat embed template the chat.htm file
+- (Optional) To get the bot to send telemetry to [Visual Studio Application Insights](https://azure.microsoft.com/en-us/services/application-insights/), copy the instrumentation key to the following files: ApplicationInsights.config, default.htm, loggedin.htm, chat.htm
+- Build the solution
+- Press F5 to start the bot locally
+- Test the bot locally with the [Bot Framework Emulator](https://docs.botframework.com/en-us/tools/bot-framework-emulator)
+- Create a web app in Azure
+- Create an Azure Cosmos DB in Azure that uses the SQL API
+- Replace the bots host name in the PrivateSettings.config file
+- Replace the database URI and key in the PrivateSettings.config file
+- Publish the solution to the Azure web app
+- Test the deployed bot using the Web Chat control by browsing to the chat.htm page  
+
+### Register bot to call Graph
+
+1. 
 
 
 ## Give us your feedback
