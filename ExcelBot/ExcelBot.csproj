@@ -274,6 +274,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Luis\ExcelBot.json" />
+<<<<<<< Updated upstream
+=======
+    <Content Include="PrivateSettings.config.example">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+>>>>>>> Stashed changes
     <None Include="Properties\PublishProfiles\excelbot - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\excelbotv3-staging - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
