@@ -1,3 +1,19 @@
+---
+page_type: sample
+products:
+- office-excel
+- ms-graph
+languages:
+- csharp
+extensions:
+  contentType: samples
+  technologies:
+  - Microsoft Graph
+  - Microsoft Bot Framework
+  services:
+  - Excel
+  createdDate: 9/15/2016 10:30:08 PM
+---
 
 # Excel Bot
 
