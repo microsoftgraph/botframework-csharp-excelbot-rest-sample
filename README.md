@@ -6,7 +6,7 @@ products:
 languages:
 - csharp
 extensions:
-  contentType: samples
+  contentType: samples 
   technologies:
   - Microsoft Graph
   - Microsoft Bot Framework
