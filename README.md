@@ -5,6 +5,7 @@ products:
 - ms-graph
 languages:
 - csharp
+description: "Excel Bot is a bot built with the Microsoft Bot Framework that demonstrates how to use Excel with the Microsoft Graph API"
 extensions:
   contentType: samples 
   technologies:
