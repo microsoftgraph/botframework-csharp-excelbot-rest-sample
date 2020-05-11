@@ -1,22 +1,10 @@
----
-page_type: sample
-products:
-- office-excel
-- ms-graph
-languages:
-- csharp
-description: "Excel Bot is a bot built with the Microsoft Bot Framework that demonstrates how to use Excel with the Microsoft Graph API"
-extensions:
-  contentType: samples 
-  technologies:
-  - Microsoft Graph
-  - Microsoft Bot Framework
-  services:
-  - Excel
-  createdDate: 9/15/2016 10:30:08 PM
----
+# [ARCHIVED] Excel Bot
 
-# Excel Bot
+## IMPORTANT
+
+**This project is being archived and replaced with the [ApprovalBot sample](https://github.com/microsoftgraph/botframework-csharp-approvalbot-sample). As part of the archival process, we're closing all open issues and pull requests.**
+
+**You can continue to use this sample "as-is", but it won't be maintained moving forward. We apologize for any inconvenience.**
 
 ## Table of Contents. ##
 
